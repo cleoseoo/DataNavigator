@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>디지털 데이터의 가치 - 개념 탐구</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --header-blue-top: #1d4d8c; --header-blue-bottom: #2a5ba0;
+            --apple-blue: #0071e3; --apple-gray: #86868b;
+            --apple-pink: #ff6b9d; --bg-apple: #f5f5f7;
+            --card-white: #ffffff; --overlay: rgba(0, 0, 0, 0.4); --success-green: #34c759;
+            --memo-yellow: #fffde7; --reflection-mint: #e8f5e9;
+            --input-shadow: #f0f2f5; 
+            --sky-blue-active: #e0f2fe; /* 연한 하늘색 */
+        }
+
+        /* 🖱️ 슬림 스크롤바 */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-apple); }
+        ::-webkit-scrollbar-thumb { background: #d2d2d7; border-radius: 10px; }
+
+        html, body { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; background-color: var(--bg-apple); display: flex; flex-direction: column; overflow: hidden; }
+
+        /* 🔵 헤더 및 메뉴 */
+        header { background: linear-gradient(180deg, var(--header-blue-top) 0%, var(--header-blue-bottom) 100%); padding: 20px 20px 0; text-align: center; color: white; flex-shrink: 0; position: relative; z-index: 5000; }
+        .main-title { font-size: 2.1rem; font-weight: 800; margin: 0; letter-spacing: -0.04em; }
+
+        nav { margin-top: 20px; display: flex; justify-content: center; gap: 4px; padding-bottom: 0; position: relative; }
+        .menu-item { position: relative; display: inline-block; }
+        .menu-link {
+            color: rgba(255, 255, 255, 0.75) !important; text-decoration: none; font-size: 0.78rem; font-weight: 600;
+            padding: 12px 14px 8px 14px; border-radius: 12px 12px 0 0;
+            background: rgba(255, 255, 255, 0.05); transition: 0.2s; display: block;
+            border: 1px solid rgba(255, 255, 255, 0.1); border-bottom: none; white-space: nowrap;
+        }
+        
+        .menu-item:hover > .menu-link { background-color: rgba(255, 255, 255, 0.15) !important; color: #ffffff !important; }
+        
+        /* 활성 메뉴: 연한 하늘색 강조 */
+        .menu-link.active { 
+            background-color: var(--sky-blue-active) !important; 
+            color: #0369a1 !important; 
+            font-weight: 900 !important; 
+            transform: translateY(-2px); 
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.1) !important;
+        }
+
+        /* 하위 메뉴 스타일 */
+        .dropdown { 
+            position: absolute; top: 100%; left: 50%; transform: translateX(-50%); 
+            background: white; border-radius: 0 0 14px 14px; min-width: 150px; 
+            display: none; list-style: none; padding: 10px 0; margin: 0; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 6000; 
+        }
+        .menu-item:hover .dropdown { display: block !important; }
+        .dropdown li a { display: block; padding: 10px 15px; color: #1d1d1f; text-decoration: none; font-size: 0.8rem; text-align: center; font-weight: 600; }
+        .dropdown li a:hover { background: var(--sky-blue-active); color: #0369a1; }
+
+        /* 🟠 메인 레이아웃 */
+        main { flex: 1; display: flex; overflow: hidden; position: relative; z-index: 1000; }
+        .content-container { flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 30px 20px; }
+        .content-card { background: var(--card-white); padding: 40px 50px; border-radius: 28px; width: 100%; max-width: 900px; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.04); }
+
+        /* 📺 슬라이드 섹션 */
+        .slide-section { background: linear-gradient(135deg, #f8fbff 0%, #edf4ff 100%); border-radius: 20px; padding: 25px; margin-bottom: 30px; border: 1px solid rgba(0, 113, 227, 0.1); display: flex; flex-direction: column; align-items: center; width: 100%; box-sizing: border-box; }
+        .flow-container { display: flex; justify-content: center; align-items: center; gap: clamp(30px, 8vw, 80px); width: 100%; margin-top: 15px; }
+        .flow-item { display: flex; flex-direction: column; align-items: center; text-align: center; }
+
+        /* 📦 보기 및 스코어 */
+        .word-score-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 35px; width: 100%; }
+        .inline-tip { background: white; color: var(--apple-blue); border: 1.5px solid var(--apple-blue); padding: 8px 16px; border-radius: 12px; font-weight: 800; font-size: 0.85rem; cursor: pointer; transition: 0.2s; }
+        .word-bank { background: #f1f7ff; border: 1.5px solid var(--apple-blue); padding: 15px 25px; border-radius: 18px; display: flex; gap: 15px; flex: 1; justify-content: center; flex-wrap: wrap; }
+        .word-item { background: white; padding: 6px 18px; border-radius: 10px; font-weight: 800; color: var(--apple-blue); font-size: 0.95rem; }
+        #scoreBoard { background: var(--apple-pink); color: white; padding: 10px 20px; border-radius: 15px; font-weight: 900; min-width: 120px; text-align: center; }
+
+        /* ⭐ 퀴즈 박스 및 예쁜 힌트 상자 */
+        .quiz-box { font-size: 1.1rem; line-height: 2.3; color: #424245; font-weight: 600; background: #f9f9fb; padding: 25px 30px; border-radius: 20px; border: 1px solid #e5e5e7; margin-bottom: 20px; text-align: left; }
+        .blank { border: none; background: var(--input-shadow); border-radius: 12px; width: 125px; height: 40px; text-align: center; font-size: 1.1rem; font-weight: 800; color: var(--apple-blue); outline: none; margin: 0 8px; vertical-align: middle; transition: all 0.2s ease; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.06); }
+        .blank.correct { background: #e8f5e9; color: var(--success-green); box-shadow: none; }
+        
+        .hint-btn { background: white; color: var(--apple-blue); border: 1px solid var(--apple-blue); padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; margin-left: 10px; font-weight: 700; vertical-align: middle; transition: 0.2s; }
+        .hint-btn:hover { background: var(--apple-blue); color: white; }
+        
+        /* ⭐ 복구된 예쁜 힌트 박스 스타일 */
+        .hint-display { 
+            font-size: 0.85rem; color: var(--apple-blue); font-weight: 700; 
+            margin-left: 10px; display: none; background: #eef6ff; 
+            padding: 4px 12px; border-radius: 8px; border: 1px dashed var(--apple-blue); 
+            vertical-align: middle; 
+        }
+
+        /* 📝 [우] 사이드바 (350px 고정) */
+        .sidebar-right { width: 350px; border-left: 1px solid #e0e0e0; display: flex; flex-direction: column; flex-shrink: 0; }
+        .memo-section { flex: 0.55; background: var(--memo-yellow); display: flex; flex-direction: column; padding: 25px; }
+        .memo-area { flex: 1; border: none; background: transparent; resize: none; font-size: 0.95rem; line-height: 1.8; outline: none; background-image: linear-gradient(#e0dcd0 1px, transparent 1px); background-size: 100% 1.8rem; }
+        .reflection-section { flex: 0.45; background: var(--reflection-mint); border-top: 1px solid #e0e0e0; display: flex; flex-direction: column; padding: 25px; }
+        .reflection-area { flex: 1; border: 1px solid rgba(0,0,0,0.08); border-radius: 14px; background: white; resize: none; padding: 15px; font-size: 0.9rem; outline: none; margin-bottom: 15px; }
+        .capture-tip { font-size: 0.75rem; color: #2e7d32; font-weight: 700; background: rgba(255,255,255,0.6); padding: 10px; border-radius: 10px; border: 1px dashed #2e7d32; text-align: center; }
+
+        footer { padding: 15px 40px; background: var(--bg-apple); color: var(--apple-gray); border-top: 1px solid #d2d2d7; font-size: 0.85rem; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--overlay); backdrop-filter: blur(8px); z-index: 9000; align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 40px; border-radius: 28px; width: 480px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="pre-title">🔍 데이터 탐정단: 세상을 움직이는 보이지 않는 힘</div>
+        <h1 class="main-title">데이터 표현 네비게이터</h1>
+        <nav>
+            <!-- ⭐ 홈 메뉴 하위 메뉴 제거 완료 -->
+            <div class="menu-item"><a href="index.html" class="menu-link">홈</a></div>
+            <div class="menu-item"><a href="#" class="menu-link active">디지털 데이터의 가치</a><ul class="dropdown"><li><a href="가치_개념.html">📖 개념 탐구</a></li><li><a href="value_practice.html">🛠️ 활용 실습</a></li></ul></div>
+            <div class="menu-item"><span class="menu-link">비트란?</span><ul class="dropdown"><li><a href="비트_개념.html">📖 개념 탐구</a></li><li><a href="bit_practice.html">🛠️ 활용 실습</a></li></ul></div>
+            <div class="menu-item"><span class="menu-link">숫자의 디지털 표현</span><ul class="dropdown"><li><a href="#">📖 개념 탐구</a></li><li><a href="#">🛠️ 활용 실습</a></li></ul></div>
+            <div class="menu-item"><span class="menu-link">문자의 디지털 표현</span><ul class="dropdown"><li><a href="#">📖 개념 탐구</a></li><li><a href="#">🛠️ 활용 실습</a></li></ul></div>
+            <div class="menu-item"><span class="menu-link">그림의 디지털 표현</span><ul class="dropdown"><li><a href="#">📖 개념 탐구</a></li><li><a href="#">🛠️ 활용 실습</a></li></ul></div>
+            <div class="menu-item"><span class="menu-link">소리의 디지털 표현</span><ul class="dropdown"><li><a href="#">📖 개념 탐구</a></li><li><a href="#">🛠️ 활용 실습</a></li></ul></div>
+            <div class="menu-item"><span class="menu-link">동영상의 디지털 표현</span><ul class="dropdown"><li><a href="#">📖 개념 탐구</a></li><li><a href="#">🛠️ 활용 실습</a></li></ul></div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="content-container">
+            <div class="content-card">
+                <div class="slide-section">
+                    <div style="font-size:1.3rem; font-weight:800; color:var(--apple-blue);">📡 데이터가 만드는 가치의 연결</div>
+                    <div class="flow-container">
+                        <div class="flow-item">
+                            <svg viewBox="0 0 24 24" width="40" fill="#0071e3"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                            <span style="font-weight:800; font-size:0.9rem; margin-top:10px;">나의 소중한 경험 데이터</span>
+                        </div>
+                        <div style="font-size: 2.2rem; color: #d2d2d7;">➜</div>
+                        <div class="flow-item">
+                            <svg viewBox="0 0 24 24" width="40" fill="#ff6b9d"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                            <span style="font-weight:800; font-size:0.9rem; margin-top:10px;">우리 공동체의 자산</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="word-score-container">
+                    <div class="inline-tip" onclick="openTipPopup()">💡 팁</div>
+                    <div class="word-bank">
+                        <div class="word-item">기록</div><div class="word-item">이미지</div>
+                        <div class="word-item">숫자</div><div class="word-item">원유</div>
+                        <div class="word-item">자산</div><div class="word-item">안전</div>
+                    </div>
+                    <div id="scoreBoard">SCORE: <span id="currentScore">0</span></div>
+                </div>
+
+                <!-- 🕵️ 모든 소스 번호가 제거된 깔끔한 문항과 복구된 힌트 박스 -->
+                <div class="quiz-box">1. 우리 주변의 모든 현상을 숫자, 문자, 영상 등으로 남기는 것을 <input type="text" class="blank" data-answer="기록" onkeyup="check(this)">이라고 합니다.</div>
+                <div class="quiz-box">2. 데이터는 우리 주변의 현상을 숫자, 문자, <input type="text" class="blank" data-answer="이미지" onkeyup="check(this)">, 영상 등으로 표현한 것입니다. <button class="hint-btn" onclick="toggleHint(this, '그림이나 사진 정보를 말해요!')">힌트 💡</button><span class="hint-display"></span></div>
+                <div class="quiz-box">3. 현실의 정보를 컴퓨터가 인식하도록 <input type="text" class="blank" data-answer="숫자" onkeyup="check(this)"> 형태로 변환한 것입니다. <button class="hint-btn" onclick="toggleHint(this, '0과 1로 처리되는 값이에요!')">힌트 💡</button><span class="hint-display"></span></div>
+                <div class="quiz-box">4. 데이터는 분석을 통해 에너지가 되는 21세기의 <input type="text" class="blank" data-answer="원유" onkeyup="check(this)">입니다.</div>
+                <div class="quiz-box">5. 일상 속의 다양한 데이터는 우리 사회를 발전시키는 소중한 <input type="text" class="blank" data-answer="자산" onkeyup="check(this)">입니다.</div>
+                <div class="quiz-box">6. 시민의 <input type="text" class="blank" data-answer="안전" onkeyup="check(this)">을 지키기 위해 누구나 자유롭게 활용하도록 개방된 데이터입니다.</div>
+            </div>
+        </div>
+
+        <aside class="sidebar-right">
+            <div class="memo-section">
+                <div style="font-weight:800; color:#8d6e63; margin-bottom:12px;">📌 학습 메모장</div>
+                <textarea class="memo-area" placeholder="중요한 내용을 기록하세요. 궁금한 사항도 기록하고 질문하세요."></textarea>
+            </div>
+            <div class="reflection-section">
+                <div style="font-weight:800; color:#2e7d32; margin-bottom:12px;">🌿 학습 활동 소감</div>
+                <textarea class="reflection-area" placeholder="새롭게 알게된 사실과 느낀점을 기록하세요."></textarea>
+                <div class="capture-tip">📸 캡처: Win+Shift+S | Mac: Cmd+Shift+4</div>
+            </div>
+        </aside>
+    </main>
+
+    <div class="modal-overlay" id="modalOverlay"><div class="modal-content" id="modalContent"></div></div>
+
+    <footer>
+        <div style="font-weight: 700; color: #1d1d1f;">데이터 네비게이터🧭</div>
+        <div style="color: var(--apple-gray);">&copy; 중학교 정보</div>
+    </footer>
+
+    <script>
+        let score = 0; const scored = new Set();
+        function check(el) {
+            if (el.value.trim() === el.getAttribute('data-answer') && !scored.has(el)) {
+                el.classList.add('correct'); el.disabled = true; scored.add(el); 
+                score += 16; if(score >= 96) score = 100;
+                document.getElementById('currentScore').innerText = score;
+                if(score === 100) showSuccess();
+            }
+        }
+        
+        /* ⭐ 복구된 예쁜 힌트 토글 함수 */
+        function toggleHint(btn, text) {
+            const display = btn.nextElementSibling;
+            if (display.style.display === 'none' || display.style.display === '') {
+                display.innerText = text;
+                display.style.display = 'inline-block';
+            } else {
+                display.style.display = 'none';
+            }
+        }
+
+        function openTipPopup() {
+            const content = document.getElementById('modalContent');
+            content.innerHTML = `<h3 style="color:var(--apple-blue);">💡 미션 가이드</h3><p style="line-height:1.8; text-align:left; padding:0 20px;">- 보기 상자에 있는 단어들을 빈칸에 입력해 보세요.<br>- 모든 정답을 맞히면 <strong>100점</strong>을 달성할 수 있습니다.<br>- 정답이 어려울 땐 <strong>'힌트'</strong> 버튼을 눌러보세요!</p><button onclick="closeModal()" style="width:100%; padding:14px; background:var(--apple-blue); color:white; border:none; border-radius:12px; font-weight:700; cursor:pointer;">확인</button>`;
+            document.getElementById('modalOverlay').style.display = 'flex';
+        }
+        function showSuccess() {
+            const content = document.getElementById('modalContent');
+            content.innerHTML = `<div style="font-size:3rem; margin-bottom:15px;">🕵️‍♂️✨</div><h2 style="color:var(--apple-blue);">탐정 미션 완료!</h2><p>오늘 배운 데이터의 가치를 잊지 마세요!<br>소감문을 캡처하여 증거로 남겨보세요!</p><button onclick="closeModal()" style="width:100%; padding:14px; background:var(--apple-blue); color:white; border:none; border-radius:12px; font-weight:700; cursor:pointer;">닫기</button>`;
+            document.getElementById('modalOverlay').style.display = 'flex';
+        }
+        function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; }
+    </script>
+</body>
+</html>
