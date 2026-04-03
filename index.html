@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>데이터 표현 네비게이터</title>
+    <title>데이터 표현 SCHOOL BOX</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
     <style>
         /* [소스 1] 기본 테마 컬러 변수 고정 */
@@ -12,164 +12,216 @@
             --apple-pink: #ff6b9d; --bg-apple: #f5f5f7;
             --card-white: #ffffff; --overlay: rgba(0, 0, 0, 0.4);
             --dark-binary: #0a3d7a; 
-            --sky-blue-active: #e0f2fe; /* [소스 1] 연한 하늘색 */
+            --sky-blue-active: #e0f2fe;
             --memo-yellow: #fffde7; --reflection-mint: #e8f5e9; --impact-blue: #e3f2fd;
+            --apple-red: #ff2d55; --success-green: #34c759;
         }
 
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--bg-apple); }
         ::-webkit-scrollbar-thumb { background: #d2d2d7; border-radius: 10px; }
 
-        html, body { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; background-color: var(--bg-apple); display: flex; flex-direction: column; overflow: hidden; }
+        html, body { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; background-color: var(--bg-apple); display: flex; flex-direction: column; overflow: hidden; transition: box-shadow 0.5s; cursor: default !important; }
 
-        /* [소스 2, 3] 헤더 및 메뉴 레이아웃 고정 */
+        /* ⭐ 교실 상태 알림판 (SOS 비콘) 24px 테두리 효과 */
+        body.status-help { box-shadow: inset 0 0 0 24px var(--apple-red); }
+        body.status-done { box-shadow: inset 0 0 0 24px var(--success-green); }
+
+        /* 헤더 및 메뉴 레이아웃 고정 */
         header { background: linear-gradient(180deg, var(--header-blue-top) 0%, var(--header-blue-bottom) 100%); padding: 20px 20px 0; text-align: center; color: white; flex-shrink: 0; position: relative; z-index: 5000; }
         .main-title { font-size: 2.1rem; font-weight: 800; margin: 0; letter-spacing: -0.04em; }
 
+        /* ⭐ [새단장] 활용 팁 버튼 스타일 (Glassmorphism & Pulse Animation) */
+        @keyframes pulseSoft {
+            0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.3); }
+            70% { box-shadow: 0 0 0 10px rgba(255,255,255,0); }
+            100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+        }
+        .tip-btn {
+            position: absolute; top: 18px; left: 25px;
+            background: rgba(255, 255, 255, 0.15); color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px; border-radius: 20px;
+            cursor: pointer !important; font-weight: 700; font-size: 0.85rem;
+            display: flex; align-items: center; gap: 6px;
+            backdrop-filter: blur(5px); transition: 0.3s; z-index: 6000;
+            animation: pulseSoft 2s infinite;
+        }
+        .tip-btn:hover {
+            background: rgba(255, 255, 255, 0.3); transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        /* 상태 컨트롤러 */
+        .status-controller { position: absolute; top: 18px; right: 25px; display: flex; gap: 10px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 20px; backdrop-filter: blur(5px); z-index: 6000; }
+        .status-btn { padding: 8px 16px; border-radius: 14px; font-weight: 800; font-size: 0.85rem; border: none; background: rgba(255,255,255,0.9); color: #333; cursor: pointer !important; transition: 0.2s; }
+        .status-btn:hover { transform: translateY(-2px); }
+        .status-btn.btn-help { color: var(--apple-red); }
+        .status-btn.btn-done { color: var(--success-green); }
+
         nav { margin-top: 20px; display: flex; justify-content: center; gap: 4px; padding-bottom: 0; position: relative; }
         .menu-item { position: relative; display: inline-block; }
-        
         .menu-link {
             color: rgba(255, 255, 255, 0.75) !important; text-decoration: none; font-size: 0.78rem; font-weight: 600;
             padding: 12px 14px 8px 14px; border-radius: 12px 12px 0 0;
             background: rgba(255, 255, 255, 0.05); transition: 0.2s; display: block;
             border: 1px solid rgba(255, 255, 255, 0.1); border-bottom: none; white-space: nowrap;
         }
+        .menu-item:hover > .menu-link { background-color: rgba(255, 255, 255, 0.15) !important; color: #ffffff !important; }
+        .menu-link.active { background-color: var(--sky-blue-active) !important; color: #0369a1 !important; font-weight: 900 !important; transform: translateY(-2px); box-shadow: 0 -4px 12px rgba(0,0,0,0.1) !important; }
 
-        /* ⭐ [해결] Hover 및 Active 스타일 충돌 수정 (소스 4 반영) */
-        /* 1. 기본 Hover 상태 */
-        .menu-item:hover > .menu-link { 
-            background-color: rgba(255, 255, 255, 0.15) !important; 
-            color: #ffffff !important; 
-        }
-
-        /* 2. 활성 메뉴 상태 (우선순위 높임) */
-        .menu-link.active {
-            background-color: var(--sky-blue-active) !important;
-            color: #0369a1 !important;
-            font-weight: 900 !important;
-            transform: translateY(-2px);
-            box-shadow: 0 -4px 12px rgba(0,0,0,0.1) !important;
-        }
-
-        /* [소스 4] 하위 메뉴 스타일 고정 */
         .dropdown { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); background: white; border-radius: 0 0 14px 14px; min-width: 150px; display: none; list-style: none; padding: 10px 0; margin: 0; box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 6000; }
         .menu-item:hover .dropdown { display: block !important; }
         .dropdown li a { display: block; padding: 10px 15px; color: #1d1d1f; text-decoration: none; font-size: 0.8rem; text-align: center; font-weight: 600; }
         .dropdown li a:hover { background: var(--sky-blue-active) !important; color: #0369a1 !important; }
 
-        /* [소스 5] 메인 레이아웃 및 비주얼 */
+        /* 메인 레이아웃 */
         main { flex: 1; display: flex; overflow: hidden; position: relative; z-index: 1000; }
         .content-container { flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 15px 20px; }
-        .welcome-card { background: var(--card-white); padding: 20px 35px; border-radius: 28px; width: 100%; max-width: 1050px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.03); }
+        .welcome-card { background: var(--card-white); padding: 25px 35px; border-radius: 28px; width: 100%; max-width: 1050px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.03); }
 
         .visual-container {
-            position: relative; width: 100%; height: 300px; border-radius: 22px; margin-bottom: 15px; overflow: hidden;
-            background: linear-gradient(135deg, #e1eefd 0%, #f1f7ff 100%); border: 1px solid rgba(0, 113, 227, 0.12);
-            display: flex; align-items: center; justify-content: center;
+            width: 100%; height: 320px; border-radius: 22px; margin-bottom: 25px; 
+            background: linear-gradient(135deg, #f8fbff 0%, #ebf4ff 100%);
+            border: 1.5px solid rgba(0, 113, 227, 0.15); box-shadow: inset 0 0 20px rgba(0, 113, 227, 0.03);
+            display: flex; align-items: center; justify-content: space-between; padding: 0 40px; box-sizing: border-box;
         }
 
-        /* 비주얼 요소 (네비게이터, 데이터, 로봇, 하트, 5인 네트워크) */
-        .navigator-left-box { position: absolute; left: 50px; top: 50%; transform: translateY(-50%); z-index: 20; display: flex; flex-direction: column; align-items: center; }
-        .nav-scanner-large { width: 100px; height: 100px; border: 1.5px solid var(--apple-blue); border-radius: 50%; animation: pulseRadar 3s infinite ease-out; position: relative; display: flex; align-items: center; justify-content: center; }
-        .nav-beam-large { position: absolute; width: 100%; height: 100%; border-top: 3px solid var(--apple-blue); border-radius: 50%; animation: rotate 4s linear infinite; }
-        .student-inside { width: 60px; height: 60px; fill: var(--apple-blue); }
+        .icon-circle {
+            width: 54px; height: 54px; border-radius: 50%; background: white; 
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.06); border: 2px solid rgba(0,113,227,0.15);
+            position: relative; z-index: 20; transition: transform 0.3s;
+        }
+        .icon-circle svg { width: 26px; height: 26px; fill: var(--apple-blue); }
+        .icon-label { font-size: 0.7rem; font-weight: 800; color: var(--apple-gray); margin-top: 6px; }
+        .icon-wrap { display: flex; flex-direction: column; align-items: center; }
 
-        .data-pkg { position: absolute; display: flex; flex-direction: column; align-items: center; z-index: 15; top: 46%; left: 180px; opacity: 0; animation: flowData 10s infinite linear; }
-        .apple-fine-icon { width: 28px; height: 28px; fill: none; stroke: var(--apple-blue); stroke-width: 1.5; }
-        .label { margin-top: 4px; color: var(--apple-blue); font-size: 0.6rem; font-weight: 800; opacity: 0.8; }
+        .input-col { display: flex; flex-direction: column; gap: 15px; }
+        .flow-track { flex: 1; height: 4px; background: rgba(0,113,227,0.1); border-radius: 2px; position: relative; overflow: hidden; margin: 0 20px; }
+        .flow-particle { position: absolute; top: 0; left: 0; width: 60px; height: 100%; background: var(--apple-blue); box-shadow: 0 0 15px 4px rgba(0,113,227,0.4); animation: flowMove 2s infinite linear; border-radius: 2px; }
+        
+        .track-out { background: rgba(255,107,157,0.1); }
+        .track-out .flow-particle { background: var(--apple-pink); box-shadow: 0 0 15px 4px rgba(255,107,157,0.4); animation: flowMove 2s infinite linear; animation-delay: 1s; }
 
-        .ai-robot { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -55%); z-index: 10; width: 160px; display: flex; flex-direction: column; align-items: center; }
-        .robot-head { width: 60px; height: 40px; border: 1.2px solid var(--apple-blue); border-radius: 14px; background: white; margin-bottom: 6px; position: relative; }
-        .robot-eye { width: 7px; height: 7px; background: var(--apple-blue); border-radius: 50%; position: absolute; top: 15px; animation: blink 3s infinite; }
-        .robot-screen { width: 150px; height: 60px; border: 1.5px solid rgba(0,113,227,0.15); border-radius: 20px; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .binary-line { font-family: 'JetBrains Mono'; font-size: 1.2rem; color: var(--dark-binary); font-weight: 800; letter-spacing: 4px; animation: binarySync 8s infinite linear; }
+        @keyframes flowMove { 0% { left: -10%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { left: 100%; opacity: 0; } }
 
-        .happy-world-bg-right { position: absolute; right: 60px; top: 50%; transform: translateY(-50%); z-index: 1; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center; border: 1.5px solid rgba(255, 107, 157, 0.15); border-radius: 50%; background: white; }
-        .happy-svg-element { width: 220px; height: 220px; filter: drop-shadow(0 4px 6px rgba(255, 107, 157, 0.2)); animation: heartPulseStrong 3s infinite ease-in-out; }
-
-        .people-right-network { position: absolute; right: 60px; top: 50%; transform: translateY(-50%); z-index: 10; width: 140px; height: 140px; }
-        .orbit-container { position: absolute; width: 100%; height: 100%; animation: rotateOrbit 15s linear infinite; }
-        .orbit-person { position: absolute; width: 24px; height: 24px; fill: var(--apple-blue); }
-        .p1 { top: 0; left: 50%; transform: translateX(-50%); } .p2 { top: 30%; right: 0; } .p3 { bottom: 5%; right: 20%; } .p4 { bottom: 5%; left: 20%; } .p5 { top: 30%; left: 0; }
-
-        @keyframes flowData { 0% { left: 160px; opacity: 0; transform: scale(0.4); } 8% { opacity: 1; transform: scale(0.8); } 48% { opacity: 0; transform: scale(0); left: 49.5%; } 52% { opacity: 0; transform: scale(0); left: 50.5%; } 65% { opacity: 1; transform: scale(0.8); } 100% { left: calc(100% - 130px); opacity: 0; transform: scale(0.2); } }
-        @keyframes heartPulseStrong { 0%, 100% { transform: scale(1); opacity: 0.3; } 50% { transform: scale(1.08); opacity: 0.45; } }
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes rotateOrbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes pulseRadar { 0%, 100% { transform: scale(0.95); } 50% { transform: scale(1.05); } }
-        @keyframes binarySync { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+        .ai-robot { display: flex; flex-direction: column; align-items: center; z-index: 30; }
+        .robot-head { width: 65px; height: 45px; border: 2px solid var(--apple-blue); border-radius: 14px; background: white; margin-bottom: 8px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .robot-eye { width: 8px; height: 8px; background: var(--apple-blue); border-radius: 50%; position: absolute; top: 16px; animation: blink 3s infinite; }
+        .robot-screen { width: 160px; height: 60px; border: 2px solid rgba(0,113,227,0.2); border-radius: 18px; background: white; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 6px 15px rgba(0,113,227,0.1); position: relative; }
+        .binary-line { font-family: 'JetBrains Mono'; font-size: 1.3rem; color: var(--apple-blue); font-weight: 800; letter-spacing: 4px; animation: binarySync 3s infinite linear; white-space: nowrap; }
+        
         @keyframes blink { 0%, 90%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+        @keyframes binarySync { 0% { transform: translateX(-80%); } 100% { transform: translateX(80%); } }
+
+        .output-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .output-grid .icon-circle { border-color: rgba(255,107,157,0.25); background: white; animation: floatPulse 3s infinite alternate; }
+        .output-grid .icon-circle svg { fill: var(--apple-pink); }
+        .output-grid .icon-wrap:nth-child(2) .icon-circle { animation-delay: 0.5s; }
+        .output-grid .icon-wrap:nth-child(3) .icon-circle { animation-delay: 1s; }
+        .output-grid .icon-wrap:nth-child(4) .icon-circle { animation-delay: 1.5s; }
+
+        @keyframes floatPulse { 0% { transform: translateY(0); box-shadow: 0 6px 12px rgba(255,107,157,0.1); } 100% { transform: translateY(-5px); box-shadow: 0 12px 20px rgba(255,107,157,0.3); } }
 
         .catchphrase { font-size: 1.5rem; font-weight: 900; color: #1d1d1f; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 4px; }
         .char-circle { display: inline-flex; align-items: center; justify-content: center; width: 2.2rem; height: 2.2rem; border: 2.5px solid var(--apple-blue); border-radius: 50%; background: white; color: var(--apple-blue); font-size: 1.1rem; font-weight: 900; box-shadow: 0 4px 10px rgba(0, 113, 227, 0.1); }
 
-        /* [소스 6] 스텝 설명 및 박스 레이아웃 (글자 크기 확대 적용) */
         .roadmap-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; }
         .roadmap-item { background: #f8f9fa; border-radius: 16px; padding: 15px 12px; border: 1px solid #eee; transition: 0.2s; cursor: pointer; text-align: left; min-height: 95px; display: flex; flex-direction: column; justify-content: center; }
-        .roadmap-item:hover { border-color: var(--apple-blue); background: white; transform: translateY(-3px); }
+        .roadmap-item:hover { border-color: var(--apple-blue); background: white; transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.05); }
         .roadmap-item h4 { margin: 0 0 6px 0; color: var(--apple-blue); font-size: 0.95rem; font-weight: 800; }
         .roadmap-item p { margin: 0; font-size: 0.82rem; color: var(--apple-gray); line-height: 1.5; }
 
-        /* 사이드바 */
         .sidebar-right { width: 350px; border-left: 1px solid #e0e0e0; display: flex; flex-direction: column; flex-shrink: 0; }
         .sidebar-section { display: flex; flex-direction: column; padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.05); }
         .section-1 { flex: 0.33; background: var(--memo-yellow); }
         .section-2 { flex: 0.33; background: var(--reflection-mint); }
         .section-3 { flex: 0.34; background: var(--impact-blue); }
         .sidebar-title { font-weight: 800; font-size: 0.85rem; margin-bottom: 8px; }
-        .sidebar-area { flex: 1; border: none; background: transparent; resize: none; font-size: 0.85rem; outline: none; }
+        .sidebar-area { flex: 1; border: none; background: transparent; resize: none; font-size: 0.85rem; outline: none; cursor: text !important;}
 
         footer { padding: 10px 40px; background: var(--bg-apple); color: var(--apple-gray); border-top: 1px solid #d2d2d7; font-size: 0.7rem; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* ⭐ 가이드 모달 전용 스타일 */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--overlay); backdrop-filter: blur(8px); z-index: 9000; align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 40px; border-radius: 28px; width: 500px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2); animation: popUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popUp { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <header>
-        <div style="font-size: 0.75rem; font-weight: 600; opacity: 0.8;">🔍 디지털 코드의 비밀을 풀어라!</div>
+      <header>
+        <div style="font-size: 0.85rem; font-weight: 600; opacity: 0.9; margin-bottom: 5px;">🔍 디지털 코드의 비밀을 풀어라!</div>
         <h1 class="main-title">데이터 표현 네비게이터</h1>
-        <button class="tip-btn" style="position: absolute; top: 20px; right: 25px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 6px 12px; border-radius: 20px; cursor: pointer; font-weight: 700;" onclick="alert('데이터 표현의 7가지 원리를 단계별로 체험해보세요!')">💡 활용팁</button>
+
+        
+        <button class="tip-btn" onclick="openGuide()">💡 이용 가이드</button>
+        
+        <div class="status-controller">
+            <button class="status-btn" onclick="setStatus('normal')">초기화</button>
+            <button class="status-btn btn-help" onclick="setStatus('help')">🙋‍♂️ SOS 요청</button>
+            <button class="status-btn btn-done" onclick="setStatus('done')">✅ 미션 완료</button>
+        </div>
+
         <nav>
-            <!-- ⭐ '홈' 메뉴가 active 상태로 유지되도록 클래스 고정 -->
             <div class="menu-item"><a href="index.html" class="menu-link active">홈</a></div>
-            <div class="menu-item"><span class="menu-link">디지털 데이터의 가치</span><ul class="dropdown"><li><a href="가치_개념.html">📖 개념 탐구</a></li><li><a href="value_practice.html">🛠️ 활용 실습</a></li></ul></div>
-            <div class="menu-item"><span class="menu-link">비트란?</span><ul class="dropdown"><li><a href="비트_개념.html">📖 개념 탐구</a></li><li><a href="bit_practice.html">🛠️ 활용 실습</a></li></ul></div>
-            <div class="menu-item"><span class="menu-link">숫자의 디지털 표현</span><ul class="dropdown"><li><a href="#">📖 개념 탐구</a></li><li><a href="#">🛠️ 활용 실습</a></li></ul></div>
-            <div class="menu-item"><span class="menu-link">문자의 디지털 표현</span><ul class="dropdown"><li><a href="#">📖 개념 탐구</a></li><li><a href="#">🛠️ 활용 실습</a></li></ul></div>
-            <div class="menu-item"><span class="menu-link">그림의 디지털 표현</span><ul class="dropdown"><li><a href="#">📖 개념 탐구</a></li><li><a href="#">🛠️ 활용 실습</a></li></ul></div>
-            <div class="menu-item"><span class="menu-link">소리의 디지털 표현</span><ul class="dropdown"><li><a href="#">📖 개념 탐구</a></li><li><a href="#">🛠️ 활용 실습</a></li></ul></div>
-            <div class="menu-item"><span class="menu-link">동영상의 디지털 표현</span><ul class="dropdown"><li><a href="#">📖 개념 탐구</a></li><li><a href="#">🛠️ 활용 실습</a></li></ul></div>
+            <div class="menu-item"><span class="menu-link">디지털 데이터의 가치</span><ul class="dropdown"><li><a href="가치_개념.html">📖 개념 탐구</a></li><li><a href="가치_활용실습.html">🛠️ 활용 실습</a></li></ul></div>
+            <div class="menu-item"><span class="menu-link">비트란?</span><ul class="dropdown"><li><a href="비트_개념.html">📖 개념 탐구</a></li><li><a href="비트_활용실습.html">🛠️ 활용 실습</a></li></ul></div>
+            <div class="menu-item"><span class="menu-link">숫자의 디지털 표현</span><ul class="dropdown"><li><a href="숫자_개념.html">📖 개념 탐구</a></li><li><a href="숫자_활용실습.html">🛠️ 활용 실습</a></li></ul></div>
+            <div class="menu-item"><span class="menu-link">문자의 디지털 표현</span><ul class="dropdown"><li><a href="문자_개념.html">📖 개념 탐구</a></li><li><a href="문자_활용실습.html">🛠️ 활용 실습</a></li></ul></div>
+            <div class="menu-item"><span class="menu-link">이미지의 디지털 표현</span><ul class="dropdown"><li><a href="이미지_개념.html">📖 개념 탐구</a></li><li><a href="이미지_활용실습.html">🛠️ 활용 실습</a></li></ul></div>
+            <div class="menu-item"><span class="menu-link">소리의 디지털 표현</span><ul class="dropdown"><li><a href="소리_개념.html">📖 개념 탐구</a></li><li><a href="소리_활용실습.html">🛠️ 활용 실습</a></li></ul></div>
+            <div class="menu-item"><span class="menu-link">동영상의 디지털 표현</span><ul class="dropdown"><li><a href="동영상_개념.html">📖 개념 탐구</a></li><li><a href="동영상_활용실습.html">🛠️ 활용 실습</a></li></ul></div>
         </nav>
     </header>
 
     <main>
         <div class="content-container">
             <div class="welcome-card">
+                
                 <div class="visual-container">
-                    <div class="navigator-left-box"><div class="nav-scanner-large"><div class="nav-beam-large"></div><svg class="student-inside" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div></div>
-                    <div class="data-pkg" style="animation-delay:0s;"><svg class="apple-fine-icon" viewBox="0 0 24 24"><text x="5" y="20" font-size="18" fill="#0071e3" font-weight="900">A</text></svg><span class="label">TEXT</span></div>
-                    <div class="data-pkg" style="animation-delay:2.5s;"><svg class="apple-fine-icon" viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm15 11l-4-4-3 3"/></svg><span class="label">IMAGE</span></div>
-                    <div class="data-pkg" style="animation-delay:5s;"><svg class="apple-fine-icon" viewBox="0 0 24 24"><path d="M12 5v14M7 9v6M17 9v6"/></svg><span class="label">SOUND</span></div>
-                    <div class="data-pkg" style="animation-delay:7.5s;"><svg class="apple-fine-icon" viewBox="0 0 24 24"><path d="M7 4l12 8-12 8V4z"/></svg><span class="label">VIDEO</span></div>
                     
-                    <div class="ai-robot"><div class="robot-head"><div class="robot-eye" style="left:17px;"></div><div class="robot-eye" style="right:17px;"></div></div><div class="robot-screen"><div class="binary-line">101101</div></div></div>
-                    
-                    <div class="happy-world-bg-right"><svg class="happy-svg-element" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="48" stroke-dasharray="3,3" stroke-width="0.8" opacity="0.4" stroke="var(--apple-pink)"/><path d="M50 68c-12-6-18-14-18-22 0-6 5-11 10-11 4 0 6 3 8 5 2-2 4-5 8-5 5 0 10 5 10 11 0 8-6 16-18 22z" fill="var(--apple-pink)"/></svg></div>
-                    
-                    <div class="people-right-network"><div class="orbit-container"><svg class="orbit-person p1" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><svg class="orbit-person p2" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><svg class="orbit-person p3" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><svg class="orbit-person p4" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><svg class="orbit-person p5" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div></div>
-                </div>
+                    <div class="input-col">
+                        <div class="icon-wrap"><div class="icon-circle"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div><div class="icon-label">사용자</div></div>
+                        <div class="icon-wrap"><div class="icon-circle"><svg viewBox="0 0 24 24"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg></div><div class="icon-label">기기</div></div>
+                        <div class="icon-wrap"><div class="icon-circle"><svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg></div><div class="icon-label">네트워크</div></div>
+                    </div>
 
-                <div class="catchphrase">세상을 움직이는 보이지 않는 힘! <div class="data-circle-box"><span class="char-circle">데</span><span class="char-circle">이</span><span class="char-circle">터</span></div> 탐정단이 되어볼까요?</div>
+                    <div class="flow-track"><div class="flow-particle"></div></div>
+
+                    <div class="ai-robot">
+                        <div class="robot-head">
+                            <div class="robot-eye" style="left:16px;"></div>
+                            <div class="robot-eye" style="right:16px;"></div>
+                        </div>
+                        <div class="robot-screen">
+                            <div class="binary-line">0110 1001 1100 0011</div>
+                        </div>
+                        <div style="font-weight: 800; color: var(--apple-blue); margin-top: 10px; font-size: 0.85rem;">이진수 변환 및 처리</div>
+                    </div>
+
+                    <div class="flow-track track-out"><div class="flow-particle"></div></div>
+
+                    <div class="output-grid">
+                        <div class="icon-wrap"><div class="icon-circle"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div><div class="icon-label" style="color:var(--apple-pink)">의료·복지</div></div>
+                        <div class="icon-wrap"><div class="icon-circle"><svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg></div><div class="icon-label" style="color:var(--apple-pink)">스마트교통</div></div>
+                        <div class="icon-wrap"><div class="icon-circle"><svg viewBox="0 0 24 24"><path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66l.95-2.3c.48.17.98.3 1.34.3C12 20 22 14 22 4C22 4 18 4 17 8z"/></svg></div><div class="icon-label" style="color:var(--apple-pink)">환경보호</div></div>
+                        <div class="icon-wrap"><div class="icon-circle"><svg viewBox="0 0 24 24"><path d="M15 11V5l-3-3-3 3v2H3v14h18V11h-6zm-8 8H5v-2h2v2zm0-4H5v-2h2v2zm0-4H5V9h2v2zm6 8h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2V9h2v2zm0-4h-2V5h2v2zm6 12h-2v-2h2v2zm0-4h-2v-2h2v2z"/></svg></div><div class="icon-label" style="color:var(--apple-pink)">스마트시티</div></div>
+                    </div>
+                </div>
+                
+                <div class="catchphrase">세상을 움직이는 보이지 않는 힘!</div> <div class="data-circle-box"><span class="char-circle">데</span><span class="char-circle">이</span><span class="char-circle">터</span> 탐정단이 되어볼까요?</div>
                 <p style="font-size:0.95rem; color:var(--apple-gray); font-weight:600; margin-top:5px;">컴퓨터가 정보를 어떻게 표현하는지 단계별 탐정 활동으로 체험해보세요!</p>
 
                 <div class="roadmap-grid">
                     <div class="roadmap-item" onclick="location.href='가치_개념.html'"><h4>STEP 01. 데이터의 가치</h4><p>기록된 데이터가 자산이 되는 과정을 탐구합니다.</p></div>
                     <div class="roadmap-item" onclick="location.href='비트_개념.html'"><h4>STEP 02. 비트란?</h4><p>디지털 정보의 최소 단위와 표현 원리를 알아봅니다.</p></div>
-                    <div class="roadmap-item"><h4>STEP 03. 숫자의 표현</h4><p>0과 1을 사용하여 숫자를 표현하는 체계를 배웁니다.</p></div>
-                    <div class="roadmap-item"><h4>STEP 04. 문자의 저장</h4><p>ASCII와 유니코드를 통해 문자의 코드를 확인합니다.</p></div>
-                    <div class="roadmap-item"><h4>STEP 05. 그림의 표현</h4><p>RGB 픽셀을 통해 이미지를 표현하는 방법을 알아봅니다.</p></div>
-                    <div class="roadmap-item"><h4>STEP 06. 소리의 표현</h4><p>샘플링과 파형을 통해 소리를 디지털로 체험합니다.</p></div>
-                    <div class="roadmap-item"><h4>STEP 07. 동영상의 표현</h4><p>이미지와 소리의 조합 원리를 학습합니다.</p></div>
+                    <div class="roadmap-item" onclick="location.href='숫자_개념.html'"><h4>STEP 03. 숫자의 디지털 표현</h4><p>0과 1을 사용하여 숫자를 표현하는 체계를 배웁니다.</p></div>
+                    <div class="roadmap-item"><h4>STEP 04. 문자의 디지털 표현</h4><p>ASCII와 유니코드를 통해 문자의 코드를 확인합니다.</p></div>
+                    <div class="roadmap-item"><h4>STEP 05. 이미지의 디지털 표현</h4><p>RGB 픽셀을 통해 이미지를 표현하는 방법을 알아봅니다.</p></div>
+                    <div class="roadmap-item"><h4>STEP 06. 소리의 디지털 표현</h4><p>샘플링과 파형을 통해 소리를 디지털로 체험합니다.</p></div>
+                    <div class="roadmap-item"><h4>STEP 07. 동영상의 디지털 표현</h4><p>이미지와 소리의 조합 원리를 학습합니다.</p></div>
                 </div>
             </div>
         </div>
@@ -181,9 +233,44 @@
         </aside>
     </main>
 
-    <footer>
+   
+   <footer>
         <div style="font-weight: 700; color: #1d1d1f;">데이터 네비게이터🧭</div>
-        <div style="color: var(--apple-gray);">&copy; 중학교 정보 - 데이터 탐정단 프로젝트</div>
+        <div style="color: var(--apple-gray);">&copy; 중학교 정보 - 데이터 표현</div>
     </footer>
+
+
+    <div class="modal-overlay" id="guideModal">
+        <div class="modal-content">
+            <div style="font-size:3.5rem; margin-bottom:10px;">🕵️‍♂️✨</div>
+            <h2 style="color:var(--apple-blue); margin-bottom:15px; font-weight:900;">데이터 탐정단 여러분, 환영합니다!</h2>
+            
+            <div style="text-align: left; background: var(--bg-apple); padding: 25px; border-radius: 20px; margin-bottom: 25px; line-height: 1.8; font-size: 0.95rem; color: #424245; border: 1px solid rgba(0,0,0,0.05);">
+                <div style="margin-bottom: 12px;"><strong>1. 단계별 미션 탐험 🧭</strong><br>상단 메뉴나 하단 로드맵을 클릭하여 미션 장소로 이동하세요.</div>
+                <div style="margin-bottom: 12px;"><strong>2. 개념과 게임의 결합 🎮</strong><br>📖 <strong>[개념 탐구]</strong>에서 비밀 원리를 배우고,<br>🛠️ <strong>[활용 실습]</strong>에서 게임을 즐기며 배운 내용을 적용하세요!</div>
+                <div><strong>3. 나만의 비밀 노트 📝</strong><br>오른쪽 <strong>[M.I.S.O. 노트]</strong>에 여러분의 질문과 생각을 자유롭게 적으며 사건 일지를 완성해 보세요.</div>
+            </div>
+            
+            <p style="font-weight: 800; color: var(--apple-blue); margin-bottom: 20px;">준비가 되었다면, 첫 번째 미션부터 시작해 볼까요?</p>
+            <button onclick="closeGuide()" style="width:100%; padding:16px; background:var(--apple-blue); color:white; border:none; border-radius:14px; font-weight:800; font-size: 1.05rem; cursor:pointer !important; transition:0.2s;">탐험 시작하기 🚀</button>
+        </div>
+    </div>
+
+    <script>
+        // 교실 알림활
+        function setStatus(status) {
+            document.body.className = ''; 
+            if(status === 'help') document.body.classList.add('status-help');
+            if(status === 'done') document.body.classList.add('status-done');
+        }
+
+        // ⭐ 가이드 모달 스크립트 추가
+        function openGuide() {
+            document.getElementById('guideModal').style.display = 'flex';
+        }
+        function closeGuide() {
+            document.getElementById('guideModal').style.display = 'none';
+        }
+    </script>
 </body>
 </html>
