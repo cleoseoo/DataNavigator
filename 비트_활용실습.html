@@ -29,8 +29,12 @@
     .modal-box h2 { font-family: 'Orbitron', sans-serif; color: var(--neon-blue); font-size: 28px; margin-top: 0; margin-bottom: 20px; letter-spacing: 2px; }
     .modal-box ul { text-align: left; color: #ccc; font-size: 16px; line-height: 1.8; padding-left: 20px; margin-bottom: 30px; }
     .modal-box li b { color: white; }
+    
     .start-btn { background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple)); color: #000; font-weight: 900; font-size: 18px; padding: 12px 40px; border: none; border-radius: 30px; cursor: pointer; transition: 0.3s; }
     .start-btn:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(0, 242, 254, 0.6); }
+    
+    .action-btn { background: var(--neon-blue); color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .action-btn:hover { filter: brightness(1.2); }
 
     .header { position: absolute; top: 30px; text-align: center; z-index: 10; transition: opacity 0.5s; display: none; }
     .title { font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 900; background: linear-gradient(to right, var(--neon-blue), var(--neon-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px; }
@@ -46,77 +50,63 @@
     .byte-container { display: flex; gap: 15px; margin-bottom: 10px; } .bit-slot { width: 50px; height: 70px; border-bottom: 3px solid #333; font-family: 'Orbitron'; font-size: 40px; font-weight: 700; display: flex; align-items: flex-end; justify-content: center; color: var(--neon-blue); }
     .byte-result { font-size: 100px; font-weight: 900; color: #fff; text-shadow: 0 0 30px #fff; opacity: 0; transform: scale(0.5); transition: all 0.5s; margin-top: 20px; } .byte-result.show { opacity: 1; transform: scale(1); }
     .grid-container { display: grid; grid-template-columns: repeat(8, 40px); grid-template-rows: repeat(8, 40px); gap: 2px; background: #111; padding: 5px; border: 2px solid #333; border-radius: 10px; }
-    .pixel { width: 40px; height: 40px; background: #000; font-size: 14px; display: flex; align-items: center; justify-content: center; color: #333; cursor: pointer; transition: 0.2s; font-family: 'Orbitron'; } .pixel.filled { background: #ff0844; color: transparent; box-shadow: 0 0 10px #ff0844; }
+    .pixel { width: 40px; height: 40px; background: #000; font-size: 14px; display: flex; align-items: center; justify-content: center; color: transparent; cursor: pointer; transition: 0.2s; font-family: 'Orbitron'; } 
+    .pixel.explored.filled { background: #ff0844; color: transparent; box-shadow: 0 0 10px #ff0844; }
+    .pixel.explored.empty { background: #222; color: #555; }
+    
     .big-data-btn { padding: 20px 40px; font-size: 24px; font-weight: 900; color: #050505; background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); border: none; border-radius: 50px; cursor: pointer; transition: 0.3s; }
     #final-bg { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop'); background-size: cover; opacity: 0; z-index: 1; transition: opacity 3s; pointer-events: none; }
     #matrix-canvas { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2; opacity: 0; pointer-events: none; }
     .final-message { position: absolute; z-index: 10; text-align: center; opacity: 0; transition: opacity 2s; background: rgba(0,0,0,0.7); padding: 40px; border-radius: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
     .next-btn { margin-top: 40px; padding: 12px 30px; font-size: 16px; font-weight: 700; color: white; background: transparent; border: 2px solid white; border-radius: 8px; cursor: pointer; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 50; } .next-btn.show { opacity: 1; pointer-events: auto; } .next-btn:hover { background: white; color: black; }
     
-    /* --- Stage 5: 네트워크 링크 게임 CSS (SNS/메신저 테마) --- */
-    #game-layout {
-        display: flex; align-items: center; justify-content: center;
-        width: 1200px; height: 500px; margin-top: 20px; gap: 20px; position: relative;
-    }
+    /* --- Stage 5: 네트워크 링크 게임 CSS --- */
+    #game-layout { display: flex; align-items: flex-start; justify-content: center; width: 1200px; height: 550px; margin-top: 20px; gap: 20px; position: relative; }
 
-    /* 좌/우 컴퓨터 화면 크기 대폭 확대 */
-    .pc-monitor {
-        width: 380px; height: 280px; background: #1a1a2e; border: 12px solid #222;
-        border-radius: 15px; position: relative; display: flex; flex-direction: column;
-        box-shadow: 0 0 30px rgba(0,0,0,0.8);
-    }
-    .pc-monitor::after { 
-        content: ''; position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%);
-        width: 80px; height: 28px; background: #222; border-radius: 2px;
-    }
-    .pc-screen {
-        flex: 1; background: #0f172a; margin: 8px; border-radius: 8px; border: 2px solid #334155;
-        padding: 20px; overflow: hidden; display: flex; flex-direction: column;
-    }
+    /* 좌/우 컴퓨터 화면 */
+    .pc-monitor { width: 380px; min-height: 280px; height: auto; background: #1a1a2e; border: 12px solid #222; border-radius: 15px; position: relative; display: flex; flex-direction: column; box-shadow: 0 0 30px rgba(0,0,0,0.8); z-index: 20; }
+    .pc-monitor::after { content: ''; position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%); width: 80px; height: 28px; background: #222; border-radius: 2px; }
+    .pc-screen { flex: 1; background: #0f172a; margin: 8px; border-radius: 8px; border: 2px solid #334155; padding: 20px; overflow: hidden; display: flex; flex-direction: column; min-height: 180px;}
     .pc-header { font-family: 'Pretendard'; font-size: 16px; font-weight: bold; text-align: center; margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 8px; }
     
-    /* 왼쪽 (송신자 - 내 PC) */
+    /* 왼쪽 (송신자) */
     .sender-screen { color: white; font-family: 'Pretendard', sans-serif; font-size: 26px; font-weight: bold; }
     .bubble-send { background: var(--neon-purple); color: white; padding: 10px 15px; border-radius: 15px 15px 0 15px; display: inline-block; margin-top: 10px; max-width: 90%; word-break: break-all; box-shadow: 0 5px 15px rgba(79, 172, 254, 0.3);}
     .highlight-char { background: var(--neon-yellow); color: black; border-radius: 3px; padding: 0 2px; }
 
-    /* 오른쪽 (수신자 - 친구 PC) */
+    /* 오른쪽 (수신자) */
     .receiver-screen { color: white; font-family: 'Pretendard', sans-serif; font-size: 26px; font-weight: bold; position: relative;}
-    .bubble-recv { background: #334155; color: white; padding: 10px 15px; border-radius: 15px 15px 15px 0; display: inline-block; margin-top: 10px; max-width: 90%; word-break: break-all; }
+    .bubble-recv { background: #334155; color: white; padding: 10px 15px; border-radius: 15px 15px 15px 0; display: inline-block; margin-top: 10px; max-width: 90%; word-break: break-all; transition: 0.3s;}
+    .bubble-recv.complete { background: var(--neon-green); color: black; box-shadow: 0 0 20px rgba(0,255,102,0.5); }
     .cursor { animation: blink 1s step-end infinite; }
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
     #corrupt-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--neon-red); font-weight: bold; text-shadow: 0 0 10px var(--neon-red); display: none; font-family: 'Orbitron'; font-size: 22px; background: rgba(0,0,0,0.8); padding: 10px 20px; border-radius: 10px;}
 
+    /* 수신기 하단 컨트롤 패널 */
+    #receiver-controls { display: none; background: #0f172a; margin: 0 8px 8px 8px; border-radius: 8px; border: 2px solid var(--neon-green); padding: 20px; text-align: center; animation: fadeIn 0.5s ease-out; box-shadow: inset 0 0 15px rgba(0,255,102,0.2); }
+
     /* 중앙 광케이블 플레이 영역 */
-    #play-area {
-        width: 400px; height: 100%; position: relative; background: #0a0a1a;
-        border-top: 4px solid #222; border-bottom: 4px solid #222; overflow: hidden;
-    }
-    
+    #play-area { width: 400px; height: 500px; position: relative; background: #0a0a1a; border-top: 4px solid #222; border-bottom: 4px solid #222; overflow: hidden; }
     #game-canvas { display: block; width: 100%; height: 100%; }
-    
-    #game-hud {
-        position: absolute; top: -40px; left: 0; width: 100%; display: flex; justify-content: center;
-        font-family: 'Orbitron'; font-size: 22px; font-weight: bold; text-shadow: 0 0 10px rgba(0,0,0,0.8);
-    }
-    
-    #target-hud {
-        position: absolute; bottom: 10px; left: 0; width: 100%;
-        text-align: center; font-family: 'Orbitron'; font-size: 20px; color: var(--neon-yellow);
-    }
+    #game-hud { position: absolute; top: -40px; left: 0; width: 100%; display: flex; justify-content: center; font-family: 'Orbitron'; font-size: 22px; font-weight: bold; text-shadow: 0 0 10px rgba(0,0,0,0.8); }
+    #target-hud { position: absolute; bottom: 10px; left: 0; width: 100%; text-align: center; font-family: 'Orbitron'; font-size: 20px; color: var(--neon-yellow); }
     .bit-progress { letter-spacing: 5px; font-size: 24px; color: white; margin-top: 5px;}
     .bit-miss { color: var(--neon-red); }
     .bit-hit { color: var(--neon-green); }
 
     /* 오버레이 (대기/결과) */
-    .game-overlay {
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.85); display: none; flex-direction: column;
-        align-items: center; justify-content: center; z-index: 10; backdrop-filter: blur(3px);
-    }
+    .game-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; backdrop-filter: blur(3px); }
     #ready-screen p { color: #ccc; font-size: 16px; margin: 5px 0; }
     .key-box { display: inline-block; background: #333; padding: 5px 15px; border-radius: 5px; color: var(--neon-blue); font-family: 'Orbitron'; margin: 0 5px; }
     #countdown-screen { font-size: 100px; font-family: 'Orbitron'; font-weight: 900; color: var(--neon-yellow); text-shadow: 0 0 30px var(--neon-yellow); }
+
+    /* 문장 및 속도 선택 드롭다운 */
+    .neon-select { background: #0f172a; color: var(--neon-blue); border: 2px solid var(--neon-blue); padding: 10px 15px; border-radius: 8px; font-family: 'Orbitron', 'Pretendard', sans-serif; font-size: 16px; font-weight: bold; outline: none; cursor: pointer; width: 100%; text-align: center; }
+    .neon-select option { background: #0f172a; color: white; }
+
+    /* 하단 완료 토스트 메시지 */
+    #bottom-toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple)); color: #fff; padding: 15px 40px; border-radius: 30px; font-family: 'Pretendard', sans-serif; font-size: 20px; font-weight: bold; box-shadow: 0 0 30px rgba(0, 242, 254, 0.6); transition: bottom 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 9999; display: flex; align-items: center; gap: 20px; }
+    #bottom-toast.show { bottom: 40px; }
 
 </style>
 </head>
@@ -153,17 +143,16 @@
     <p style="margin-bottom: 30px; font-size: 18px; color: #ccc; line-height: 1.6;">
         가장 작은 단위인 <b>비트(Bit) 8개</b>가 모이면 <b>1바이트(Byte)</b>가 됩니다.<br>
         컴퓨터는 이 8자리 이진수로 문자를 표현하기로 약속했는데, 이를 <b>아스키코드(ASCII)</b>라고 부릅니다.<br>
-        예를 들어, 대문자 'A'는 <span style="color:var(--neon-yellow)">01000001</span> 이라는 신호로 약속되어 있죠.<br><br>
         자, 키보드 <b>숫자 0</b> 과 <b>1</b> 을 8번 눌러서 어떤 문자가 탄생하는지 직접 확인해 보세요!
     </p>
     <div class="byte-container" id="s2-slots"></div>
     <div class="byte-result" id="s2-result">A</div>
-    <p id="s2-text" style="margin-top:20px; color:var(--neon-blue); opacity:0; transition:0.5s;"></p>
+    <p id="s2-text" style="margin-top:20px; color:var(--neon-blue); opacity:0; transition:0.5s; line-height: 1.6;"></p>
     <button class="next-btn" id="s2-next" onclick="goStage(3)">진화하기 →</button>
 </div>
 
 <div class="stage" id="stage3">
-    <p style="margin-bottom: 20px; font-size: 18px; color: #ccc;">64개의 비트(8x8)가 모였습니다.<br>검은 타일(0) 위로 <b>마우스를 문질러</b> 빛(1)으로 채워보세요.</p>
+    <p style="margin-bottom: 20px; font-size: 18px; color: #ccc; line-height: 1.6;">64개의 비트(8x8)가 모였습니다.<br>마우스로 복권을 긁듯 검은 타일 전체를 <b>문질러서</b><br>데이터가 어떤 모양을 하고 있는지 확인해 보세요!</p>
     <div class="grid-container" id="s3-grid"></div>
     <button class="next-btn" id="s3-next" onclick="goStage(4)">궁극의 진화 →</button>
 </div>
@@ -189,7 +178,7 @@
     
     <div id="game-layout">
         <div class="pc-monitor">
-            <div class="pc-header" style="color:var(--neon-blue)">🟢 내 PC (전송 중...)</div>
+            <div class="pc-header" style="color:var(--neon-blue)">🟢 내 PC (송신자)</div>
             <div class="pc-screen sender-screen">
                 <div style="text-align: right;">
                     <div class="bubble-send" id="sender-text"></div>
@@ -210,44 +199,59 @@
             </div>
             
             <div id="ready-screen" class="game-overlay" style="display:flex;">
-                <h2 style="color:var(--neon-blue); font-size:24px; margin-bottom:10px;">MISSION: 메시지 전송</h2>
-                <div style="text-align: left; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                    <p style="color:var(--neon-yellow); margin-top:0;">🟡 <b>노란색 원 (Receiver)</b> = 데이터 수신기</p>
-                    <p style="color:var(--neon-blue);">🔵 <b>날아오는 0과 1 (Bit)</b> = 전기 신호</p>
-                    <p style="color:white; margin-bottom:0;">이 비트가 8개 모이면 1개의 <b>글자(패킷)</b>이 완성됩니다.</p>
+                <h2 style="color:var(--neon-blue); font-size:24px; margin-bottom:10px;">MISSION: 메시지 수신</h2>
+                
+                <div style="width: 80%; text-align: left;">
+                    <select id="msg-select" class="neon-select" style="margin-top: 10px; margin-bottom: 5px;">
+                        <option value="0">I LOVE YOU (10글자)</option>
+                        <option value="1">BE HAPPY! (9글자)</option>
+                        <option value="2">GOOD LUCK! (10글자)</option>
+                        <option value="3">STAY STRONG (11글자)</option>
+                        <option value="4">NEVER GIVE UP (13글자)</option>
+                    </select>
+                    
+                    <select id="speed-select" class="neon-select" style="margin-top: 5px; margin-bottom: 20px;">
+                        <option value="2.5">데이터 전송 속도: 느림 🐢</option>
+                        <option value="4.0" selected>데이터 전송 속도: 보통 🏃</option>
+                        <option value="6.0">데이터 전송 속도: 빠름 🚀</option>
+                    </select>
                 </div>
-                <p><span class="key-box">⬆️ 위 방향키</span> = HIGH 신호 [ 1 ] 수신</p>
-                <p><span class="key-box">⬇️ 아래 방향키</span> = LOW 신호 [ 0 ] 수신</p>
-                <button class="start-btn" style="margin-top:25px;" onclick="startCountdown()">접속 (START)</button>
+
+                <div style="text-align: left; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; width: 80%;">
+                    <p style="color:var(--neon-yellow); margin-top:0;">🟡 <b>오른쪽 수신기(RECV)</b> 위치를 위아래로 움직이세요.</p>
+                    <p style="color:var(--neon-blue); margin-bottom:0;">🔵 <b>날아오는 0과 1 (Bit)</b> = 초고속 전기 신호</p>
+                </div>
+                <p><span class="key-box">⬆️ 위 방향키</span> = [ 1 ] 라인으로 이동</p>
+                <p><span class="key-box">⬇️ 아래 방향키</span> = [ 0 ] 라인으로 이동</p>
+                <button class="start-btn" style="margin-top:20px;" onclick="startCountdown()">접속 (START)</button>
             </div>
 
             <div id="countdown-screen" class="game-overlay">3</div>
-
-            <div id="game-over-screen" class="game-overlay">
-                <h2 style="color:var(--neon-green); font-size:30px; margin:0;" id="result-title">ALL MESSAGES SENT!</h2>
-                <p style="font-size:20px; margin-top:15px; color:white;">최종 점수: <b id="final-score" style="color:var(--neon-yellow)">0</b> 점</p>
-                
-                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin: 15px 0; border: 1px solid #444; text-align: left;">
-                    <p style="font-size:16px; color:#ddd; margin:5px 0;">완벽하게 보낸 메시지: <b id="perfect-sentences" style="color:var(--neon-green);">0</b> / 2</p>
-                </div>
-                
-                <div>
-                    <button class="start-btn" style="font-size:14px; padding: 10px 20px;" onclick="initReadyScreen()">다시 보내기</button>
-                    <button class="next-btn show" style="font-size:14px; padding: 10px 20px; margin-top:0; margin-left: 5px;" onclick="location.reload()">처음으로</button>
-                </div>
-            </div>
         </div>
 
         <div class="pc-monitor">
-            <div class="pc-header" style="color:var(--neon-green)">🟢 친구의 PC (수신 중...)</div>
+            <div class="pc-header" style="color:var(--neon-green)">🟢 친구의 PC (수신자)</div>
             <div class="pc-screen receiver-screen">
                 <div style="text-align: left;">
-                    <div class="bubble-recv"><span id="receiver-text"></span><span class="cursor">_</span></div>
+                    <div class="bubble-recv" id="bubble-box"><span id="receiver-text"></span><span class="cursor" id="cursor">_</span></div>
                 </div>
                 <div id="corrupt-msg">ERROR: 패킷 손실!</div>
             </div>
+            
+            <div id="receiver-controls">
+                <h3 style="color:var(--neon-green); margin-top:0; font-size:22px;">TRANSMISSION COMPLETE</h3>
+                <p style="font-size: 18px; margin-bottom: 20px;">수신 정확도: <span id="accuracy-display" style="color:white; font-weight:bold; font-size:24px;">100</span>%</p>
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button class="action-btn" style="padding: 10px 30px; font-size:16px;" onclick="resetToReady()">🔄 다시 보내기</button>
+                </div>
+            </div>
+
         </div>
     </div>
+</div>
+
+<div id="bottom-toast">
+    <span>🎉 통신 완료! 데이터 전송 작업이 종료되었습니다.</span>
 </div>
 
 <script>
@@ -282,21 +286,45 @@
     document.getElementById('stage1').addEventListener('click', (e) => { if(e.target.tagName !== 'BUTTON') toggleBit(); });
     
     let byteInput = "";
-    function initStage2() { byteInput = ""; document.getElementById('s2-slots').innerHTML = ""; for(let i=0; i<8; i++) { let s = document.createElement('div'); s.className = 'bit-slot'; s.innerText = "_"; document.getElementById('s2-slots').appendChild(s); } document.getElementById('s2-result').classList.remove('show'); document.getElementById('s2-next').classList.remove('show'); }
+    function initStage2() { 
+        byteInput = ""; document.getElementById('s2-slots').innerHTML = ""; 
+        for(let i=0; i<8; i++) { 
+            let s = document.createElement('div'); s.className = 'bit-slot'; s.innerText = "_"; 
+            document.getElementById('s2-slots').appendChild(s); 
+        } 
+        document.getElementById('s2-result').classList.remove('show'); 
+        document.getElementById('s2-next').classList.remove('show'); 
+    }
     
     function handleByteInput(e) {
         if((e.key === "0" || e.key === "1") && byteInput.length < 8) {
             byteInput += e.key; document.querySelectorAll('.bit-slot')[byteInput.length - 1].innerText = e.key;
             if(byteInput.length === 8) {
                 let decimalValue = parseInt(byteInput, 2);
-                let charValue = "?";
-                if(decimalValue >= 33 && decimalValue <= 126) charValue = String.fromCharCode(decimalValue); else if(decimalValue === 32) charValue = "(공백)";
+                let charValue = "";
+                let isPrintable = true;
+
+                // 아스키코드표 매핑 및 예외 처리
+                if(decimalValue >= 33 && decimalValue <= 126) {
+                    charValue = String.fromCharCode(decimalValue);
+                } else if(decimalValue === 32) {
+                    charValue = "␣(공백)";
+                } else {
+                    charValue = "🚫";
+                    isPrintable = false;
+                }
                 
                 setTimeout(() => { 
                     document.getElementById('s2-slots').style.display = 'none'; 
                     let r = document.getElementById('s2-result'); r.innerText = charValue; r.classList.add('show'); 
                     let textBox = document.getElementById('s2-text');
-                    textBox.innerHTML = `방금 누르신 이진수 <b>${byteInput}</b> 은 십진수로 <b>${decimalValue}</b> 입니다.<br>컴퓨터의 아스키코드 약속에 따라 이 데이터는 <b>'${charValue}'</b> 가 됩니다!`;
+                    
+                    if(isPrintable) {
+                        textBox.innerHTML = `방금 누르신 이진수 <b>${byteInput}</b> 은 십진수로 <b>${decimalValue}</b> 입니다.<br>컴퓨터의 아스키코드 약속에 따라 이 데이터는 <b>'${charValue}'</b> 가 됩니다!`;
+                    } else {
+                        textBox.innerHTML = `방금 누르신 십진수 <b>${decimalValue}</b> 은 아스키코드표에서<br>화면에 표시할 수 없는 <b>컴퓨터 제어 문자</b>로 약속되어 있습니다.`;
+                    }
+                    
                     textBox.style.opacity = 1;
                     document.getElementById('s2-next').classList.add('show'); 
                 }, 300);
@@ -304,15 +332,50 @@
         }
     }
 
-    const heartPattern = [0,1,1,0,0,1,1,0, 1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1, 0,1,1,1,1,1,1,0, 0,0,1,1,1,1,0,0, 0,0,0,1,1,0,0,0, 0,0,0,0,0,0,0,0];
-    let pixelsFilled = 0; let targetPixels = heartPattern.filter(x=>x===1).length;
+    // 3단계 하트 배열 (1: 빨강, 0: 배경)
+    const heartPattern = [
+        0,1,1,0,0,1,1,0, 
+        1,1,1,1,1,1,1,1, 
+        1,1,1,1,1,1,1,1, 
+        1,1,1,1,1,1,1,1, 
+        0,1,1,1,1,1,1,0, 
+        0,0,1,1,1,1,0,0, 
+        0,0,0,1,1,0,0,0, 
+        0,0,0,0,0,0,0,0
+    ];
+    let pixelsExplored = 0; 
+    
     function initStage3() {
-        document.getElementById('s3-grid').innerHTML = ""; pixelsFilled = 0;
-        for(let i=0; i<64; i++) { let px = document.createElement('div'); px.className = 'pixel'; px.innerText = "0"; px.addEventListener('mouseover', ()=>fillPixel(i,px)); document.getElementById('s3-grid').appendChild(px); }
+        document.getElementById('s3-grid').innerHTML = ""; 
+        pixelsExplored = 0;
+        for(let i=0; i<64; i++) { 
+            let px = document.createElement('div'); 
+            px.className = 'pixel'; 
+            px.innerText = "0"; 
+            // 마우스 호버 시 픽셀 상태 밝히기
+            px.addEventListener('mouseover', ()=>explorePixel(i,px)); 
+            document.getElementById('s3-grid').appendChild(px); 
+        }
     }
-    function fillPixel(i, el) {
-        if(el.classList.contains('filled')) return;
-        if(heartPattern[i]===1) { el.classList.add('filled'); el.innerText="1"; pixelsFilled++; if(pixelsFilled>=targetPixels) { document.getElementById('s3-next').classList.add('show'); } }
+    
+    // 3단계 버그 수정 (어디든 긁으면 데이터 확인 가능)
+    function explorePixel(i, el) {
+        if(el.classList.contains('explored')) return; // 이미 밝혀진 타일 무시
+        
+        el.classList.add('explored');
+        if(heartPattern[i]===1) { 
+            el.classList.add('filled'); 
+            el.innerText="1"; 
+        } else {
+            el.classList.add('empty'); 
+            el.innerText="0"; 
+        }
+        
+        pixelsExplored++;
+        // 64개 픽셀(전체 화면)을 모두 확인하면 성공!
+        if(pixelsExplored >= 64) { 
+            document.getElementById('s3-next').classList.add('show'); 
+        }
     }
 
     function triggerBigBang() {
@@ -320,6 +383,7 @@
         const mCanvas = document.getElementById('matrix-canvas'); mCanvas.style.opacity = 1; startMatrixRain(mCanvas);
         setTimeout(() => { mCanvas.style.opacity = 0; document.getElementById('final-bg').style.opacity = 1; setTimeout(() => { let msg = document.getElementById('final-msg'); msg.style.display = 'block'; void msg.offsetWidth; msg.style.opacity = 1; }, 1000); }, 3000);
     }
+    
     function startMatrixRain(canvas) {
         const ctx = canvas.getContext('2d'); canvas.width = window.innerWidth; canvas.height = window.innerHeight;
         const letters = "01"; const fontSize = 16; const drops = []; for(let x=0; x<canvas.width/fontSize; x++) drops[x]=1;
@@ -329,51 +393,64 @@
         }, 30); setTimeout(()=>clearInterval(matrixInterval), 4000);
     }
 
-    // --- Stage 5: SNS 메시지 전송 게임 ---
-    // 1분에 약 2문장을 보낼 수 있도록 구성된 문장 (약 20글자, 160비트)
+    // --- Stage 5: SNS 메시지 수신 게임 ---
     const SENTENCES = [
-        "I LOVE YOU",
-        "BE HAPPY!"
+        "I LOVE YOU", 
+        "BE HAPPY!", 
+        "GOOD LUCK!", 
+        "STAY STRONG", 
+        "NEVER GIVE UP"
     ];
-    
-    let currentSentenceIdx = 0;
+    let selectedSentence = "";
     let currentCharIdx = 0;
-    let targetBinary = ""; 
-    let collectedBits = []; 
-    
-    let score = 0;
-    let isRunnerActive = false;
-    let perfectSentenceCount = 0;
+    let targetBinary = ""; let collectedBits = []; 
+    let score = 0; let perfectCharCount = 0; let totalPlayableChars = 0;
+    let isRunnerActive = false; 
 
     const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d');
     let gameLoopId;
-    
-    // 타격감을 위한 파티클 이펙트 배열
     let particles = [];
 
-    // 난이도 세팅: 1분당 2문장을 보내기 위한 황금 속도
-    const player = { x: 80, radius: 40 }; 
+    const player = { x: 340, radius: 40 }; 
     const trackY = { 1: 150, 0: 300 }; 
     let playerState = 0; 
     let activeBits = [];
     
-    // 속도와 간격 조정 (여유롭지만 지루하지 않음)
-    let bitSpeed = 3.5; 
+    // 속도 초기값 (보통)
+    let bitSpeed = 4.0; 
     let bitSpacing = 110; 
 
     let receivedString = ""; 
-    let isSentencePerfect = true; 
+
+    function resetToReady() {
+        document.getElementById('receiver-controls').style.display = 'none';
+        document.getElementById('bottom-toast').classList.remove('show');
+        document.getElementById('bubble-box').classList.remove('complete');
+        document.getElementById('cursor').style.display = 'inline';
+        document.getElementById('receiver-text').innerHTML = "";
+        document.getElementById('sender-text').innerHTML = "";
+        initReadyScreen();
+    }
 
     function initReadyScreen() {
-        document.getElementById('game-over-screen').style.display = 'none';
-        document.getElementById('countdown-screen').style.display = 'none';
         document.getElementById('ready-screen').style.display = 'flex';
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawTracks();
     }
 
     function startCountdown() {
+        // 유저가 선택한 문장 설정
+        let selectEl = document.getElementById('msg-select');
+        selectedSentence = SENTENCES[selectEl.value];
+        
+        // 유저가 선택한 3단계 속도 설정
+        let speedEl = document.getElementById('speed-select');
+        bitSpeed = parseFloat(speedEl.value);
+
+        // 공백 및 기호를 제외한 순수 플레이 문자 수 계산
+        totalPlayableChars = selectedSentence.replace(/[ !?.]/g, "").length;
+
         document.getElementById('ready-screen').style.display = 'none';
         const cdScreen = document.getElementById('countdown-screen');
         cdScreen.style.display = 'flex';
@@ -393,24 +470,24 @@
     function charToBinary(char) { return char.charCodeAt(0).toString(2).padStart(8, '0'); }
 
     function renderSenderText() {
-        let sentence = SENTENCES[currentSentenceIdx];
-        if(!sentence) return;
         let html = "";
-        for(let i=0; i<sentence.length; i++) {
-            if (i === currentCharIdx) html += `<span class="highlight-char">${sentence[i] === " " ? "&nbsp;" : sentence[i]}</span>`;
-            else html += sentence[i] === " " ? "&nbsp;" : sentence[i];
+        for(let i=0; i<selectedSentence.length; i++) {
+            if (i === currentCharIdx) html += `<span class="highlight-char">${selectedSentence[i] === " " ? "&nbsp;" : selectedSentence[i]}</span>`;
+            else html += selectedSentence[i] === " " ? "&nbsp;" : selectedSentence[i];
         }
         document.getElementById('sender-text').innerHTML = html;
     }
 
     function setupNextChar() {
-        if (currentSentenceIdx >= SENTENCES.length) { gameOver(); return; }
+        if (currentCharIdx >= selectedSentence.length) { 
+            setTimeout(gameOver, 1000); // 문장이 끝나면 1초 뒤 종료
+            return; 
+        }
 
-        let sentence = SENTENCES[currentSentenceIdx];
-        let char = sentence[currentCharIdx];
-
+        let char = selectedSentence[currentCharIdx];
         renderSenderText();
 
+        // 공백이나 기호는 게임 없이 자동 통과
         if (char === " " || char === "!" || char === "?" || char === ".") {
             receivedString += char;
             document.getElementById('receiver-text').innerHTML = receivedString.replace(/ /g, "&nbsp;");
@@ -428,7 +505,7 @@
         for(let i=0; i<8; i++) {
             let requiredValue = parseInt(targetBinary[i]);
             activeBits.push({
-                x: canvas.width + (i * bitSpacing),
+                x: -50 - (i * bitSpacing), 
                 value: requiredValue,
                 y: trackY[requiredValue],
                 index: i, processed: false
@@ -454,48 +531,36 @@
         setTimeout(() => { msg.style.display = 'none'; }, 800);
     }
 
-    // 타격감을 위한 이펙트 생성 함수
     function createHitEffect(x, y, isPerfect) {
         particles.push({
-            x: x, y: y,
-            radius: 10, maxRadius: 40,
-            alpha: 1,
+            x: x, y: y, radius: 10, maxRadius: 40, alpha: 1,
             color: isPerfect ? '#00ff66' : '#ff0844',
             text: isPerfect ? '+10' : 'MISS!'
         });
     }
 
-    // 파티클 그리기 함수
     function drawParticles() {
         for (let i = particles.length - 1; i >= 0; i--) {
             let p = particles[i];
-            p.radius += 2;
-            p.alpha -= 0.05;
-            
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            p.radius += 2; p.alpha -= 0.05;
+            ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
             ctx.strokeStyle = `rgba(${p.color === '#00ff66' ? '0,255,102' : '255,8,68'}, ${p.alpha})`;
-            ctx.lineWidth = 3;
-            ctx.stroke();
-
+            ctx.lineWidth = 3; ctx.stroke();
             ctx.fillStyle = `rgba(${p.color === '#00ff66' ? '0,255,102' : '255,8,68'}, ${p.alpha})`;
-            ctx.font = "bold 20px Orbitron";
-            ctx.fillText(p.text, p.x, p.y - p.radius);
-
+            ctx.font = "bold 20px Orbitron"; ctx.fillText(p.text, p.x, p.y - p.radius);
             if (p.alpha <= 0) particles.splice(i, 1);
         }
     }
 
     function evaluateChar() {
-        let sentence = SENTENCES[currentSentenceIdx];
-        let char = sentence[currentCharIdx];
+        let char = selectedSentence[currentCharIdx];
         let isPerfect = !collectedBits.includes('X');
         
         if (isPerfect) { 
             score += 100; 
+            perfectCharCount++;
             receivedString += char; 
         } else {
-            isSentencePerfect = false;
             receivedString += `<span style="color:var(--neon-red)">#</span>`; 
             triggerCorruptMessage();
         }
@@ -505,34 +570,19 @@
 
         currentCharIdx++;
         
-        if (currentCharIdx >= sentence.length) {
-            if (isSentencePerfect) { 
-                score += 500; 
-                perfectSentenceCount++; 
-            }
-            updateScoreUI();
-            
-            currentSentenceIdx++; currentCharIdx = 0;
-            receivedString = ""; 
-            isSentencePerfect = true;
-            
-            setTimeout(() => { 
-                document.getElementById('receiver-text').innerHTML = ""; 
-                setupNextChar(); 
-            }, 1500); 
+        if (currentCharIdx >= selectedSentence.length) {
+            renderSenderText();
+            setTimeout(gameOver, 1000); 
         } else {
             setTimeout(setupNextChar, 300); 
         }
     }
 
     function startGameplay() {
-        score = 0; currentSentenceIdx = 0; currentCharIdx = 0; perfectSentenceCount = 0; 
-        isRunnerActive = true; receivedString = ""; isSentencePerfect = true; particles = [];
-        
+        score = 0; currentCharIdx = 0; perfectCharCount = 0; 
+        isRunnerActive = true; receivedString = ""; particles = [];
         document.getElementById('receiver-text').innerHTML = "";
-        updateScoreUI(); 
-        
-        setupNextChar();
+        updateScoreUI(); setupNextChar();
         cancelAnimationFrame(gameLoopId); runnerLoop();
     }
 
@@ -541,21 +591,19 @@
             let b = activeBits[i];
             if(b.processed) continue;
             
-            b.x -= bitSpeed;
+            b.x += bitSpeed; 
 
-            // 판정
-            if (b.x < player.x + player.radius) {
+            if (b.x > player.x - player.radius) {
                 b.processed = true;
                 if (playerState === b.value) { 
                     collectedBits.push(b.value.toString()); 
                     score += 10; updateScoreUI(); 
-                    createHitEffect(player.x, trackY[playerState], true); // 히트 이펙트
+                    createHitEffect(player.x, trackY[playerState], true); 
                 } else { 
                     collectedBits.push('X'); 
-                    createHitEffect(player.x, trackY[playerState], false); // 미스 이펙트
+                    createHitEffect(player.x, trackY[playerState], false); 
                 }
                 updateBitProgressUI();
-                
                 if (b.index === 7) { setTimeout(evaluateChar, 100); }
             }
         }
@@ -565,9 +613,13 @@
         ctx.strokeStyle = "rgba(255, 255, 255, 0.1)"; ctx.lineWidth = 2; ctx.beginPath();
         ctx.moveTo(0, trackY[1]); ctx.lineTo(canvas.width, trackY[1]); ctx.moveTo(0, trackY[0]); ctx.lineTo(canvas.width, trackY[0]); ctx.stroke();
         
+        ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
+        ctx.font = "italic 900 30px Orbitron"; ctx.textAlign = "center";
+        ctx.fillText("SPEED OF LIGHT >>>", 200, 225);
+
         ctx.beginPath();
         ctx.setLineDash([5, 15]);
-        ctx.moveTo(player.x, trackY[playerState]); ctx.lineTo(0, 225);
+        ctx.moveTo(player.x, trackY[playerState]); ctx.lineTo(canvas.width, 225);
         ctx.strokeStyle = "rgba(252, 226, 5, 0.3)"; ctx.stroke();
         ctx.setLineDash([]);
     }
@@ -579,21 +631,26 @@
         ctx.font = "bold 24px Orbitron"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
         activeBits.forEach(b => {
             if(b.processed) return;
+            
+            ctx.beginPath();
+            ctx.moveTo(b.x, b.y); ctx.lineTo(b.x - 30, b.y);
+            ctx.strokeStyle = b.value === 1 ? "rgba(79, 172, 254, 0.6)" : "rgba(0, 242, 254, 0.6)";
+            ctx.lineWidth = 6; ctx.stroke();
+
             ctx.fillStyle = b.value === 1 ? "rgba(79, 172, 254, 0.3)" : "rgba(0, 242, 254, 0.3)";
             ctx.strokeStyle = b.value === 1 ? "#4facfe" : "#00f2fe";
             ctx.fillRect(b.x - 20, b.y - 20, 40, 40); ctx.strokeRect(b.x - 20, b.y - 20, 40, 40);
             ctx.fillStyle = "#fff"; ctx.fillText(b.value, b.x, b.y);
         });
 
-        // 수신기(Player) 그리기
         let pY = trackY[playerState];
-        ctx.beginPath(); ctx.arc(player.x, pY, player.radius, Math.PI/2, Math.PI*1.5, true);
+        ctx.beginPath(); ctx.arc(player.x, pY, player.radius, Math.PI * 0.5, Math.PI * 1.5, false);
         ctx.strokeStyle = "var(--neon-yellow)"; ctx.lineWidth = 5; ctx.stroke();
+        
         ctx.beginPath(); ctx.arc(player.x, pY, player.radius, 0, Math.PI * 2);
         ctx.fillStyle = "rgba(252, 226, 5, 0.1)"; ctx.fill();
-        ctx.fillStyle = "var(--neon-yellow)"; ctx.font = "bold 16px Orbitron"; ctx.fillText("RECV", player.x - 5, pY);
+        ctx.fillStyle = "var(--neon-yellow)"; ctx.font = "bold 16px Orbitron"; ctx.fillText("RECV", player.x + 12, pY);
 
-        // 파티클(타격감) 그리기
         drawParticles();
     }
 
@@ -604,9 +661,19 @@
 
     function gameOver() {
         isRunnerActive = false; 
-        document.getElementById('perfect-sentences').innerText = perfectSentenceCount;
-        document.getElementById('final-score').innerText = score;
-        document.getElementById('game-over-screen').style.display = 'flex';
+        
+        let accuracy = Math.round((perfectCharCount / totalPlayableChars) * 100);
+        document.getElementById('accuracy-display').innerText = accuracy;
+        if(accuracy < 100) document.getElementById('accuracy-display').style.color = "var(--neon-red)";
+        else document.getElementById('accuracy-display').style.color = "white";
+
+        document.getElementById('cursor').style.display = 'none';
+        if(accuracy === 100) {
+            document.getElementById('bubble-box').classList.add('complete');
+        }
+
+        document.getElementById('receiver-controls').style.display = 'block';
+        document.getElementById('bottom-toast').classList.add('show');
     }
 
     function updateScoreUI() { document.getElementById('score-display').innerText = score; }
@@ -619,7 +686,6 @@
             else if (e.key === "1" || e.code === "ArrowUp") { playerState = 1; e.preventDefault(); }
         }
     });
-
 </script>
 </body>
 </html>
