@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>동영상의 디지털 표현 - 개념 탐구</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=JetBrains+Mono:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        /* 🎨 테마 변수 (남색 계열로 변경) */
+        :root {
+            --multi-navy: #192a56;
+            --multi-navy-light: #487eb0;
+            --multi-orange: #fdcb6e;
+            --multi-pink: #ff7675;
+            
+            --text-main: #1d1d1f;
+            --text-sub: #86868b;
+            --apple-gray: #86868b;
+            --apple-red: #ff2d55;
+            --success-green: #34c759;
+            
+            --menu-active-bg: #e8f0fe; 
+            --menu-active-text: #153a7a;
+            
+            --overlay: rgba(0, 0, 0, 0.4); 
+            
+            --accent-blue: #0984e3;
+            --accent-green: #00b894; 
+            --accent-red: #d63031; 
+            --accent-navy: #192a56;
+            --glass-border: rgba(255, 255, 255, 0.8);
+
+            /* 버튼용 부드러운 붉은색 추가 */
+            --soft-red: #e63946; 
+        }
+
+        /* 폰트 및 초기화 */
+        * { cursor: default !important; box-sizing: border-box; }
+        
+        /* ⭐ 투명한 유리 느낌의 스크롤바 (슬라이드 바) 커스텀 */
+        ::-webkit-scrollbar { width: 14px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { 
+            background: rgba(25, 42, 86, 0.25); 
+            border-radius: 20px; 
+            border: 4px solid transparent; 
+            background-clip: padding-box; 
+        }
+        ::-webkit-scrollbar-thumb:hover { 
+            background: rgba(25, 42, 86, 0.5); 
+            border: 4px solid transparent; 
+            background-clip: padding-box; 
+        }
+
+        html, body { 
+            margin: 0; padding: 0; height: 100%; 
+            font-family: 'Pretendard', 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 50%, #f8fafc 100%);
+            color: var(--text-main);
+            display: flex; flex-direction: column; overflow: hidden; 
+            transition: box-shadow 0.5s; position: relative;
+        }
+
+        body.status-help { box-shadow: inset 0 0 0 40px var(--apple-red); }
+        body.status-done { box-shadow: inset 0 0 0 40px var(--success-green); }
+
+        /* ⭐ 세련된 글래스모피즘 헤더 */
+        header { 
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding: 15px 30px 0; flex-shrink: 0; position: relative; z-index: 5000; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .header-top { width: 100%; display: flex; justify-content: space-between; align-items: center; }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .target-badge { background: #1d1d1f; color: white; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.5px; }
+        
+        .main-title { font-size: 1.4rem; font-weight: 900; margin: 0; letter-spacing: -0.02em; color: var(--text-main); cursor: pointer; transition: 0.3s; }
+        .main-title:hover { 
+            background: linear-gradient(135deg, var(--multi-navy-light) 0%, var(--multi-navy) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .status-controller { display: flex; gap: 8px; }
+        .status-btn { 
+            padding: 8px 16px; border-radius: 20px; font-weight: 800; font-size: 0.8rem; 
+            border: 1px solid rgba(0,0,0,0.1); background: rgba(255,255,255,0.9); color: var(--text-main); 
+            cursor: pointer !important; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+        .status-btn:hover { transform: translateY(-2px); background: #f9f9f9; }
+        .status-btn.btn-help { color: var(--apple-red); border-color: rgba(255,45,85,0.2); }
+        .status-btn.btn-done { color: var(--success-green); border-color: rgba(52,199,89,0.2); }
+
+        /* 메뉴바 구조 */
+        nav { margin-top: 15px; display: flex; justify-content: center; gap: 4px; padding-bottom: 0; position: relative; width: 100%; }
+        .menu-item { position: relative; display: inline-block; }
+        .menu-link {
+            color: var(--text-sub) !important; text-decoration: none; font-size: 0.8rem; font-weight: 700;
+            padding: 12px 18px 10px 18px; border-radius: 12px 12px 0 0;
+            background: transparent; transition: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); display: block;
+            border: 1px solid transparent; border-bottom: none; white-space: nowrap;
+        }
+        
+        .menu-link.active { 
+            background-color: var(--menu-active-bg) !important; color: var(--menu-active-text) !important; 
+            font-weight: 900 !important; border-color: rgba(0,0,0,0.05);
+            box-shadow: 0 -4px 12px rgba(25, 42, 86, 0.1) !important; 
+        }
+        .menu-item:hover > .menu-link:not(.active) { background-color: #f1f5f9 !important; color: var(--multi-navy) !important; }
+
+        .dropdown { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); background: white; border-radius: 0 0 14px 14px; min-width: 150px; display: none; list-style: none; padding: 10px 0; margin: 0; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 6000; border: 1px solid rgba(0,0,0,0.05); }
+        .menu-item:hover .dropdown { display: block !important; }
+        .dropdown li a { display: block; padding: 10px 15px; color: var(--text-main); text-decoration: none; font-size: 0.8rem; text-align: center; font-weight: 700; transition: 0.2s;}
+        .dropdown li a:hover { background: var(--menu-active-bg); color: var(--menu-active-text); }
+
+        /* 메인 레이아웃 */
+        main { flex: 1; display: flex; overflow: hidden; position: relative; z-index: 1000; width: 100%; }
+        
+        .content-container { flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 30px 20px 100px 20px; }
+        
+        .glass-panel { 
+            background: rgba(255, 255, 255, 0.65); 
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            border-radius: 28px; padding: 40px 45px;
+            width: 100%; max-width: 1000px; position: relative; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05), inset 0 0 0 1px rgba(255,255,255,0.9); 
+            min-height: 500px; height: auto; display: flex; flex-direction: column; 
+            flex-shrink: 0; margin-bottom: 40px; 
+        }
+
+        .lock-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.7); backdrop-filter: blur(15px); border-radius: 28px; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease; }
+        .lock-box { background: rgba(255,255,255,0.9); padding: 40px 50px; border-radius: 24px; border: 1px solid var(--glass-border); text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .lock-input { padding: 12px 20px; font-size: 1.5rem; font-weight: 900; border-radius: 12px; border: 2px solid #dfe6e9; outline: none; text-align: center; margin-top: 20px; width: 200px; font-family: 'JetBrains Mono', monospace; background: #fff; color: var(--accent-navy); transition: 0.3s; cursor: text !important;}
+        .lock-input:focus { border-color: var(--accent-navy); box-shadow: 0 0 0 4px rgba(25, 42, 86, 0.2); }
+        .btn-submit { padding: 12px 25px; border-radius: 12px; border: none; font-size: 1.1rem; font-weight: 900; background: linear-gradient(135deg, var(--multi-navy), var(--multi-navy-light)); color: white; cursor: pointer !important; box-shadow: 0 4px 15px rgba(25, 42, 86, 0.4); transition: 0.2s; margin-top: 20px;}
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(25, 42, 86, 0.6); }
+
+        .step-container { width: 100%; transition: opacity 0.4s ease, transform 0.4s ease; display: none; opacity: 0; transform: translateX(20px); flex: 1; flex-direction: column; }
+        .step-container.active { display: flex; opacity: 1; transform: translateX(0); }
+
+        .step-navigation { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 25px; padding-top: 20px; border-top: 1px dashed rgba(0,0,0,0.1); }
+        .nav-arrow { display: inline-flex; align-items: center; gap: 8px; color: var(--multi-navy); font-weight: 900; font-size: 1.05rem; cursor: pointer !important; transition: 0.2s; padding: 10px 15px; border-radius: 12px; background: transparent; }
+        .nav-arrow:hover { background: var(--menu-active-bg); transform: translateX(3px); } 
+        .nav-arrow.prev:hover { transform: translateX(-3px); }
+        .nav-arrow:active { transform: translateY(1px); }
+        .nav-arrow svg { width: 30px; height: 30px; fill: var(--multi-navy); }
+        .nav-arrow.next { margin-left: auto; }
+        .nav-arrow.prev { margin-right: auto; }
+
+        /* ⭐ 사이드바 - 메모장 색상을 남색 파스텔톤 글래스모피즘으로 수정 */
+        .sidebar-right { 
+            width: 360px; display: flex; flex-direction: column; flex-shrink: 0; 
+            padding: 30px 0 35px 20px; 
+            gap: 20px; z-index: 1000; 
+            background: transparent; border: none;
+        }
+        
+        .memo-section, .reflection-section { 
+            /* 남색 톤의 유리 질감 배경 */
+            background: linear-gradient(135deg, rgba(210, 225, 245, 0.9) 0%, rgba(175, 195, 225, 0.75) 100%); 
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border-radius: 28px 0 0 28px; 
+            border: 1px solid rgba(255, 255, 255, 0.8); 
+            border-right: none; 
+            padding: 25px 30px 25px 25px; 
+            display: flex; flex-direction: column; 
+            box-shadow: inset 2px 2px 8px rgba(255,255,255,0.6), -10px 10px 30px rgba(25, 42, 86, 0.15); 
+        }
+        
+        .memo-section { flex: 0.55; }
+        .reflection-section { flex: 0.45; }
+        
+        .memo-area { 
+            flex: 1; border: none; background: transparent; resize: none; font-size: 0.95rem; line-height: 1.8; outline: none; 
+            /* 줄무늬 색상도 남색 톤으로 은은하게 적용 */
+            background-image: linear-gradient(rgba(25, 42, 86, 0.2) 1px, transparent 1px); 
+            background-size: 100% 1.8rem; cursor: text !important; font-family: 'Pretendard', sans-serif;
+            color: #1d1d1f;
+        }
+        .reflection-area { 
+            flex: 1; border: 1px solid rgba(255,255,255,0.9); border-radius: 14px; background: rgba(255,255,255,0.7); 
+            resize: none; padding: 15px; font-size: 0.9rem; line-height: 1.6; outline: none; margin-bottom: 12px; cursor: text !important; font-family: 'Pretendard', sans-serif; 
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.02);
+            transition: 0.3s;
+        }
+        .reflection-area:focus { background: white; border-color: var(--multi-navy); box-shadow: 0 0 0 3px rgba(25, 42, 86, 0.2); }
+        .capture-tip { 
+            font-size: 0.75rem; color: var(--multi-navy); font-weight: 800; background: rgba(255,255,255,0.85); 
+            padding: 8px; border-radius: 10px; border: 1px dashed var(--multi-navy-light); text-align: center; 
+        }
+
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--overlay); backdrop-filter: blur(8px); z-index: 9000; align-items: center; justify-content: center; text-align: center; flex-direction: column; }
+        .overlay-box { background: white; padding: 40px; border-radius: 28px; border: none; width: 480px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); animation: popUp 0.3s ease-out; }
+        @keyframes popUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* 개념/실습 전용 스타일 */
+        .slide-section { background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); border-radius: 22px; padding: 30px; margin-bottom: 25px; border: 1px solid rgba(25, 42, 86, 0.1); box-shadow: inset 0 0 20px rgba(25, 42, 86, 0.03); width: 100%; box-sizing: border-box; text-align: center; }
+        .visual-title { font-size: 1.4rem; font-weight: 900; margin-bottom: 10px; color: var(--multi-navy); }
+        
+        .video-container { position: relative; width: 600px; height: 300px; margin: 20px auto 0; background: #e9ecef; border-radius: 16px; border: 3px solid rgba(25, 42, 86, 0.3); overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); }
+        #videoVisCanvas { width: 100%; height: 100%; display: block; background: #ffffff; }
+
+        .action-btn { background: var(--multi-navy); color: white; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 800; cursor: pointer !important; transition: 0.2s; margin-top: 20px; font-size: 1rem; box-shadow: 0 4px 10px rgba(25, 42, 86, 0.3); }
+        .action-btn:hover { background: var(--multi-navy-light); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(25, 42, 86, 0.4); }
+
+        .concept-wrap { display: flex; flex-direction: column; gap: 15px; margin-top: 10px; text-align: left; }
+        .concept-row { background: #fafafa; border: 1px solid rgba(0,0,0,0.05); border-radius: 16px; padding: 20px 25px; display: flex; align-items: flex-start; gap: 15px; line-height: 1.7; font-size: 1.05rem; color: #343a40; font-weight: 600; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .concept-icon { font-size: 1.8rem; flex-shrink: 0; line-height: 1; margin-top: 2px; }
+        .pill-btn { background: linear-gradient(135deg, var(--multi-navy-light), #74b9ff); color: white; border: none; border-radius: 12px; padding: 4px 12px; font-size: 0.95rem; font-weight: 900; cursor: pointer !important; box-shadow: 0 3px 6px rgba(9, 132, 227, 0.3); display: inline-flex; align-items: center; gap: 4px; vertical-align: baseline; transition: 0.2s;}
+        .pill-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(9, 132, 227, 0.4); }
+
+        .word-score-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 30px; width: 100%; }
+        .word-bank { background: #f8fafc; border: 1px solid rgba(25, 42, 86, 0.2); padding: 15px 25px; border-radius: 18px; display: flex; gap: 15px; flex: 1; justify-content: center; flex-wrap: wrap; }
+        .word-item { background: white; padding: 6px 16px; border-radius: 10px; font-weight: 800; color: var(--multi-navy); font-size: 0.95rem; box-shadow: 0 4px 6px rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.05); cursor: grab !important; transition: 0.2s;}
+        .word-item:hover { transform: translateY(-2px); box-shadow: 0 6px 10px rgba(0,0,0,0.05); }
+        .word-item:active { cursor: grabbing !important; }
+        
+        .hud-score { background: var(--apple-red); color: white; padding: 12px 28px; border-radius: 18px; font-weight: 900; min-width: 140px; text-align: center; box-shadow: 0 6px 15px rgba(255,45,85,0.3); transition: transform 0.2s; flex-shrink: 0; display: flex; align-items: center; justify-content: center; gap: 8px;}
+        .hud-label { font-size: 1.1rem; color: white; font-weight: 800; }
+        .hud-value { font-size: 1.4rem; font-weight: 900; color: white; }
+        .hud-score.pulse { transform: scale(1.15); box-shadow: 0 10px 25px rgba(255,45,85,0.5); }
+
+        .quiz-box { font-size: 1.05rem; line-height: 2.3; color: var(--text-main); font-weight: 600; background: #fafafa; padding: 25px 30px; border-radius: 20px; border: 1px solid rgba(0,0,0,0.05); margin-bottom: 15px; text-align: left; transition: 0.3s; }
+        .quiz-box:hover { background: white; border-color: rgba(25, 42, 86, 0.15); box-shadow: 0 5px 15px rgba(0,0,0,0.02); }
+        
+        .blank { box-sizing: border-box; display: inline-block; width: 105px; height: 38px; background: white; border: 2px dashed rgba(25, 42, 86, 0.4); border-radius: 10px; vertical-align: middle; padding: 0 5px; text-align: center; line-height: 34px; font-size: 1.05rem; font-weight: 800; color: var(--multi-navy); margin: 0 6px; transition: all 0.2s ease; cursor: text !important; outline: none; }
+        .blank:focus { border-color: var(--multi-navy); box-shadow: 0 0 8px rgba(25, 42, 86, 0.2); width: 115px; }
+        .blank-correct { background: #e8f5e9 !important; color: var(--success-green) !important; border: 2px solid var(--success-green) !important; box-shadow: none !important; pointer-events: none; }
+        
+        @keyframes errorShakeBlank { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); background-color: #ff7675; color: white; border-color: var(--accent-red); } 75% { transform: translateX(8px); background-color: #ff7675; color: white; border-color: var(--accent-red); } }
+        .blank-error { animation: errorShakeBlank 0.4s ease; }
+
+        /* 3단계 실습 전용 스타일 */
+        .fps-lab { background: #fafafa; border: 1px solid rgba(0,0,0,0.05); border-radius: 22px; padding: 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.02); width: 100%; display: flex; flex-direction: column; align-items: center; }
+        .fps-canvas-wrap { width: 500px; height: 250px; background: #1e272e; border: 4px solid #34495e; border-radius: 12px; position: relative; overflow: hidden; margin-bottom: 20px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
+        #fpsCanvas { width: 100%; height: 100%; display: block; }
+        .fps-slider-box { display: flex; align-items: center; gap: 15px; width: 100%; max-width: 500px; background: #f8fafc; padding: 15px 25px; border-radius: 15px; margin-bottom: 20px; border: 1px solid rgba(0,0,0,0.05); }
+        
+        .mission-box { background: #fffde7; border: 1px dashed #fdcb6e; padding: 20px 25px; border-radius: 16px; width: 100%; max-width: 600px; text-align: left; font-size: 1rem; color: #856404; font-weight: 700; margin-top: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+        .mission-input-group { display: flex; gap: 10px; margin-top: 15px; align-items: center; justify-content: flex-end;}
+        .mission-input { padding: 8px 15px; border-radius: 10px; border: 2px solid #fdcb6e; font-size: 1.1rem; font-weight: 900; width: 120px; text-align: center; outline: none; font-family: 'JetBrains Mono', monospace; color: var(--multi-navy); }
+        .mission-btn { background: #fdcb6e; color: #424245; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 900; cursor: pointer !important; transition: 0.2s; font-size: 1rem; }
+        .mission-btn:hover { background: #f39c12; transform: translateY(-2px); }
+        
+        #toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%); background: var(--success-green); color: #fff; padding: 12px 30px; border-radius: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); font-weight: 800; font-size: 1.1rem; opacity: 0; transition: 0.3s; z-index: 9999; pointer-events: none;}
+        
+        footer { 
+            padding: 15px 40px; background: rgba(255,255,255,0.5); 
+            color: var(--apple-gray); border-top: 1px solid rgba(0,0,0,0.05); 
+            font-size: 0.8rem; font-weight: 600; flex-shrink: 0; 
+            display: flex; justify-content: space-between; align-items: center; 
+        }
+    </style>
+</head>
+<body id="mainBody">
+
+    <header>
+        <div class="header-top">
+            <div class="header-left">
+                <span class="target-badge">대상: 중학교 1~3학년</span>
+                <h1 class="main-title" onclick="location.href='index.html'">데이터 비트박스</h1>
+            </div>
+            <div class="status-controller">
+                <button class="status-btn" onclick="resetStatus()">🔄 초기화</button>
+                <button class="status-btn btn-help" onclick="setStatus('help')">🙋‍♂️ SOS 요청</button>
+                <button class="status-btn btn-done" onclick="setStatus('done')">✅ 미션 완료</button>
+            </div>
+        </div>
+
+        <nav>
+            <div class="menu-item"><span class="menu-link">디지털 데이터의 가치</span><ul class="dropdown"><li><a href="가치_개념.html">📖 개념 탐구</a></li><li><a href="가치_활용실습.html">🛠️ 활용 실습</a></li></ul></div>
+            <div class="menu-item"><span class="menu-link">비트란?</span><ul class="dropdown"><li><a href="비트_개념.html">📖 개념 탐구</a></li><li><a href="비트_활용실습.html">🛠️ 활용 실습</a></li></ul></div>
+            <div class="menu-item"><span class="menu-link">숫자의 디지털 표현</span><ul class="dropdown"><li><a href="숫자_개념.html">📖 개념 탐구</a></li><li><a href="숫자_활용실습.html">🛠️ 활용 실습</a></li></ul></div>
+            <div class="menu-item"><span class="menu-link">문자의 디지털 표현</span><ul class="dropdown"><li><a href="문자_개념.html">📖 개념 탐구</a></li><li><a href="문자_활용실습.html">🛠️ 활용 실습</a></li></ul></div>
+            <div class="menu-item"><span class="menu-link">이미지의 디지털 표현</span><ul class="dropdown"><li><a href="이미지_개념.html">📖 개념 탐구</a></li><li><a href="이미지_활용실습.html">🛠️ 활용 실습</a></li></ul></div>
+            <div class="menu-item"><span class="menu-link">소리의 디지털 표현</span><ul class="dropdown"><li><a href="소리_개념.html">📖 개념 탐구</a></li><li><a href="소리_활용실습.html">🛠️ 활용 실습</a></li></ul></div>
+            
+            <div class="menu-item">
+                <span class="menu-link active">동영상의 디지털 표현</span>
+                <ul class="dropdown">
+                    <li><a href="동영상_개념.html">📖 개념 탐구</a></li>
+                    <li><a href="동영상_활용실습.html">🛠️ 활용 실습</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="content-container">
+            <div class="glass-panel">
+
+                <div class="lock-overlay" id="lockOverlay">
+                    <div class="lock-box">
+                        <div style="font-size: 3.5rem; margin-bottom: 15px;">🔒</div>
+                        <h2 style="margin: 0 0 10px 0; color: var(--text-main); font-weight: 900;">보안 암호를 풀어라!</h2>
+                        <p style="font-size: 0.95rem; color: var(--text-sub); margin-bottom: 20px; line-height: 1.6; font-weight:600;">
+                             '동영상' 데이터 비트박스를 열려면<br>
+                            <b style="color:var(--multi-pink)">오늘 날짜(일)를 이진수로 변환</b>하여 입력하세요!
+                        </p>
+                        <input type="text" id="lockInput" class="lock-input" placeholder="예: 101" onkeypress="if(event.key==='Enter') checkPassword()" autocomplete="off">
+                        <br>
+                        <button class="btn-submit" onclick="checkPassword()">보안 시스템 해제</button>
+                    </div>
+                </div>
+
+                <div id="step1-visual" class="step-container active">
+                    <div class="slide-section">
+                        <div class="visual-title">💡 동영상은 어떻게 움직이는 걸까?</div>
+                        <div style="font-size: 0.95rem; color: #424245; font-weight: 700;">
+                            사실 동영상은 수많은 정지 이미지(프레임)가 아주 빠르게 지나가는 '착시 현상'입니다!<br>아래 [프레임 분해하기] 버튼을 눌러 통통 튀는 공이 어떻게 쪼개지는지 확인하세요.
+                        </div>
+                        
+                        <div class="video-container" id="videoContainer">
+                            <canvas id="videoVisCanvas" width="600" height="300"></canvas>
+                        </div>
+                        
+                        <button class="action-btn" id="btnDissect" onclick="toggleFilmScan()">🎞️ 프레임 분해하기 (정지 이미지 확인)</button>
+                    </div>
+
+                    <div class="step-navigation">
+                        <div class="nav-arrow next" onclick="goStep('step2-concept')">
+                            <div>개념 탐구 (동영상의 원리와 압축)</div>
+                            <svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5v10z"/></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="step2-concept" class="step-container">
+                    <div style="font-size: 1.3rem; font-weight: 900; color: var(--multi-navy); margin-bottom: 10px; text-align: left; padding-left: 10px;">동영상의 디지털 표현 원리</div>
+                    <div class="concept-wrap">
+                        <div class="concept-row">
+                            <div class="concept-icon">👀</div>
+                            <div style="flex:1;">
+                                <b style="color:var(--multi-navy-light)">잔상 효과 (Persistence of Vision)</b> : 눈에 보였던 물체가 사라진 후에도 짧은 시간 동안 뇌에 이미지가 남아있는 현상. 이 원리를 이용해 정지된 이미지를 연속으로 보여주면 뇌는 그것을 움직임으로 착각합니다.
+                            </div>
+                        </div>
+                        <div class="concept-row">
+                            <div class="concept-icon">🖼️</div>
+                            <div style="flex:1;">
+                                <b>프레임 (Frame) : </b><button class="pill-btn" onclick="revealInline(this, '동영상을 구성하는 한 장의 정지 이미지', 'var(--multi-navy-light)')">❓ 확인</button><br>
+                                수많은 프레임들이 모여 하나의 영상 흐름을 만들어 냅니다.
+                            </div>
+                        </div>
+                        <div class="concept-row">
+                            <div class="concept-icon">⏱️</div>
+                            <div style="flex:1;">
+                                <b>프레임 레이트 (fps) : </b><button class="pill-btn" style="background: linear-gradient(135deg, var(--multi-navy), #273c75);" onclick="revealInline(this, '1초당 화면에 보여주는 프레임의 개수 (Frames Per Second)', 'var(--multi-navy)')">❓ 확인</button><br>
+                                <span style="font-size: 0.85rem; color: var(--text-sub);">* fps 수치가 높을수록 1초에 더 많은 그림을 보여주어 움직임이 훨씬 부드럽습니다. (영화는 보통 24fps, 게임은 60fps 이상)</span>
+                            </div>
+                        </div>
+                        <div class="concept-row">
+                            <div class="concept-icon">🗜️</div>
+                            <div style="flex:1;">
+                                <b>동영상 압축 (Compression) : </b><button class="pill-btn" style="background: linear-gradient(135deg, var(--accent-green), #55efc4);" onclick="revealInline(this, '데이터의 용량을 줄이는 과정', 'var(--accent-green)')">❓ 확인</button><br>
+                                동영상은 수많은 이미지의 연속이므로 파일 크기가 어마어마합니다. 따라서 앞뒤 프레임의 비슷한 부분을 묶거나 생략하여 용량을 줄이는 코덱(Codec) 기술이 필수적입니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-navigation">
+                        <div class="nav-arrow prev" onclick="goStep('step1-visual')">
+                            <svg viewBox="0 0 24 24"><path d="M14 7l-5 5 5 5V7z"/></svg>
+                            <div>이전 (애니메이션 보기)</div>
+                        </div>
+                        <div class="nav-arrow next" onclick="goStep('step3-advanced')">
+                            <div>심화 실습 (프레임 실험 및 용량)</div>
+                            <svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5v10z"/></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="step3-advanced" class="step-container">
+                    <div style="font-size: 1.3rem; font-weight: 900; color: var(--multi-navy); margin-bottom: 5px; text-align:left;">🔥 심화 실습: 프레임(fps) 야간 비행 실험실</div>
+                    <p style="color: var(--text-sub); font-size: 0.95rem; margin-top: 5px; margin-bottom: 15px; font-weight: 600; text-align:left;">
+                        슬라이더를 조절하여 우주선이 그리는 네온 궤적을 관찰하세요.<br>
+                        <b>FPS가 낮으면</b> 띄엄띄엄 순간이동을 하고, <b>FPS가 높으면</b> 부드러운 하나의 선으로 이어집니다!
+                    </p>
+                    
+                    <div class="fps-lab">
+                        <div class="fps-slider-box">
+                            <span style="font-weight: 900; color: var(--multi-navy); font-size: 1rem; flex-shrink: 0;">프레임 조절 (fps):</span>
+                            <input type="range" id="fpsSlider" min="2" max="60" step="2" value="60" oninput="updateFPS()" style="flex: 1; cursor: pointer; accent-color: var(--multi-navy); height: 8px; border-radius: 4px;">
+                            <span id="fpsValDisplay" style="font-weight: 900; color: #2d3436; min-width: 60px; font-size: 1.1rem; text-align: right;">60 fps</span>
+                        </div>
+                        
+                        <div class="fps-canvas-wrap">
+                            <canvas id="fpsCanvas" width="500" height="250"></canvas>
+                        </div>
+
+                        <div class="mission-box">
+                            <div style="font-size: 1.1rem; margin-bottom: 8px;"><b>🚨 [수사 미션] 압축 전 데이터 용량 구하기</b></div>
+                            해상도 크기로 인해 프레임 <b style="color:var(--apple-red)">1장의 용량이 2MB</b>인 고화질 이미지가 있습니다.<br>
+                            이 이미지를 사용하여 <b style="color:var(--apple-red)">30fps</b>의 속도로 <b style="color:var(--apple-red)">10초</b> 분량의 동영상을 촬영한다면, 압축 기술을 적용하기 전 동영상의 총 데이터 용량은 몇 MB가 될까요?
+                            
+                            <div class="mission-input-group">
+                                <span style="font-weight: 900; color:#495057;">정답: </span>
+                                <input type="text" id="missionInput" class="mission-input" placeholder="숫자만 입력">
+                                <span style="font-weight: 900; color:#495057;">MB</span>
+                                <button class="mission-btn" onclick="checkMission()">제출하기</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-navigation">
+                        <div class="nav-arrow prev" onclick="goStep('step2-concept')">
+                            <svg viewBox="0 0 24 24"><path d="M14 7l-5 5 5 5V7z"/></svg>
+                            <div>이전 (개념 탐구)</div>
+                        </div>
+                        <div class="nav-arrow next" onclick="goStep('step4-quiz')">
+                            <div>개념 확인 (최종 퀴즈)</div>
+                            <svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5v10z"/></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="step4-quiz" class="step-container">
+                    <div style="font-size: 1.3rem; font-weight: 900; color: var(--apple-red); margin-bottom: 25px;">🎯 최종 퀴즈: 동영상의 디지털 표현 마스터하기!</div>
+
+                    <div class="word-score-container">
+                        <div class="word-bank">
+                            <div class="word-item" draggable="true" ondragstart="drag(event)">프레임</div>
+                            <div class="word-item" draggable="true" ondragstart="drag(event)">fps</div>
+                            <div class="word-item" draggable="true" ondragstart="drag(event)">픽셀</div>
+                            <div class="word-item" draggable="true" ondragstart="drag(event)">압축</div>
+                            <div class="word-item" draggable="true" ondragstart="drag(event)">스트리밍</div>
+                            <div class="word-item" draggable="true" ondragstart="drag(event)">잔상</div>
+                        </div>
+                        <div class="hud-score" id="scoreBoard">
+                            <div class="hud-label">SCORE:</div>
+                            <div class="hud-value" id="currentScore">0</div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-box">1. 동영상은 여러 장의 정지 이미지를 연속적으로 보여주어 뇌가 움직인다고 착각하게 만드는 눈의 <input type="text" class="blank" data-answer="잔상" oninput="checkAns(this)" ondrop="drop(event)" ondragover="allowDrop(event)" autocomplete="off"> 효과를 이용한다.</div>
+                    <div class="quiz-box">2. 동영상을 구성하는 한 장 한 장의 정지 이미지를 <input type="text" class="blank" data-answer="프레임" oninput="checkAns(this)" ondrop="drop(event)" ondragover="allowDrop(event)" autocomplete="off"> (이)라고 부른다.</div>
+                    <div class="quiz-box">3. 1초 동안 화면에 보여주는 이미지의 장수를 나타내는 단위를 <input type="text" class="blank" data-answer="fps" oninput="checkAns(this)" ondrop="drop(event)" ondragover="allowDrop(event)" autocomplete="off"> (이)라고 한다. 값이 클수록 부드럽다.</div>
+                    <div class="quiz-box">4. 동영상은 그대로 저장하면 용량이 너무 크기 때문에, 중복되는 데이터를 제거하여 파일 크기를 줄이는 <input type="text" class="blank" data-answer="압축" oninput="checkAns(this)" ondrop="drop(event)" ondragover="allowDrop(event)" autocomplete="off"> 과정을 거친다.</div>
+                    <div class="quiz-box">5. 화면을 구성하는 가장 작은 점을 의미하며, 프레임 한 장의 해상도를 결정하는 요소는 <input type="text" class="blank" data-answer="픽셀" oninput="checkAns(this)" ondrop="drop(event)" ondragover="allowDrop(event)" autocomplete="off"> 이다.</div>
+                    <div class="quiz-box" style="margin-bottom:0;">6. 인터넷에서 대용량의 동영상 파일을 모두 다운로드하지 않고, 조금씩 전송받으면서 동시에 재생하는 기술을 <input type="text" class="blank" data-answer="스트리밍" oninput="checkAns(this)" ondrop="drop(event)" ondragover="allowDrop(event)" autocomplete="off"> (이)라고 한다.</div>
+
+                    <div class="step-navigation">
+                        <div class="nav-arrow prev" onclick="goStep('step3-advanced')">
+                            <svg viewBox="0 0 24 24"><path d="M14 7l-5 5 5 5V7z"/></svg>
+                            <div>이전 (심화 실습)</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            
+            <div id="toast">정답입니다! 🎉</div>
+        </div>
+
+         <aside class="sidebar-right">
+            <div class="memo-section">
+                <div style="font-weight:900; color:#1e1e2f; margin-bottom:12px; font-size:1.05rem;">📌 학습 메모장</div>
+                <textarea class="memo-area" placeholder="중요한 내용을 기록하세요. 궁금한 사항은 기록하고 질문하세요."></textarea>
+            </div>
+            <div class="reflection-section">
+                <div style="font-weight:900; color:#1e1e2f; margin-bottom:12px; font-size:1.05rem;">🌿 학습 활동 소감</div>
+                <textarea class="reflection-area" placeholder="새롭게 알게된 사실과 느낀점을 기록하세요."></textarea>
+                <div class="capture-tip">📸 캡처: Win+Shift+S | Mac: Cmd+Shift+4</div>
+            </div>
+        </aside>
+
+    </main>
+
+    <div class="overlay" id="modalOverlay">
+        <div class="overlay-box">
+            <div style="font-size:3.5rem; margin-bottom:15px;">🎬✅</div>
+            <h2 style="color:var(--multi-navy); margin-bottom: 15px; font-weight: 900;">동영상 수사 완료!</h2>
+            <p style="color: #424245; line-height: 1.6; margin-bottom: 25px;">동영상이 여러 장의 정지 프레임으로 이루어져 있고, 프레임 레이트(fps)와 압축 기술이 데이터 용량에 미치는 영향을 완벽히 이해했습니다!<br>우측 상단의 '미션 완료'를 누르고 선생님께 알려주세요.</p>
+            <button onclick="closeModal()" style="width:100%; padding:14px; background:var(--multi-navy); color:white; border:none; border-radius:12px; font-weight:700; cursor:pointer !important;">확인</button>
+        </div>
+    </div>
+
+    <div class="overlay" id="customAlertOverlay" style="z-index: 9999;">
+        <div class="overlay-box" style="padding: 35px 40px;">
+            <div style="font-size: 1.2rem; font-weight: 800; color: #2d3436; margin-bottom: 25px; white-space: pre-line; word-break: keep-all;" id="customAlertMsg">메시지가 이곳에 표시됩니다.</div>
+            <button onclick="closeCustomAlert()" style="padding: 12px 30px; font-size: 1rem; background:var(--multi-navy); color:white; border:none; border-radius:12px; font-weight:700; cursor:pointer !important;">확인</button>
+        </div>
+    </div>
+    
+    <footer>
+        <div style="font-weight: 700; color: var(--text-main);">데이터 비트박스🧭</div>
+        <div style="color: var(--apple-gray);">&copy; 중학교 정보 - 데이터 표현</div>
+    </footer>
+
+    <script>
+        const today = new Date().getDate(); 
+        const secretCode = today.toString(2); 
+
+        function showCustomAlert(msg) {
+            document.getElementById('customAlertMsg').innerText = msg;
+            document.getElementById('customAlertOverlay').style.display = 'flex';
+        }
+        function closeCustomAlert() {
+            document.getElementById('customAlertOverlay').style.display = 'none';
+        }
+        
+        function checkPassword() {
+            const inputVal = document.getElementById('lockInput').value.trim();
+            if(inputVal === secretCode) {
+                const overlay = document.getElementById('lockOverlay');
+                overlay.style.opacity = '0';
+                setTimeout(() => { overlay.style.display = 'none'; document.getElementById('lockInput').blur(); }, 500); 
+            } else {
+                showCustomAlert(`접근 거부!\n힌트: 오늘 날짜(${today}일)를 이진수로 변환해 보세요.`);
+                document.getElementById('lockInput').value = '';
+                document.getElementById('lockInput').focus();
+            }
+        }
+
+        function resetStatus() { document.body.className = ''; }
+        function setStatus(status) {
+            document.body.className = ''; 
+            if(status === 'help') document.body.classList.add('status-help');
+            if(status === 'done') document.body.classList.add('status-done');
+        }
+
+        function goStep(id) {
+            const current = document.querySelector('.step-container.active');
+            const next = document.getElementById(id);
+            if(current === next) return;
+
+            current.style.opacity = '0'; 
+            
+            const currentNum = parseInt(current.id.match(/\d+/)[0]);
+            const nextNum = parseInt(id.match(/\d+/)[0]);
+            
+            current.style.transform = (nextNum > currentNum) ? 'translateX(-20px)' : 'translateX(20px)';
+            
+            setTimeout(() => {
+                current.classList.remove('active'); next.classList.add('active');
+                if(id === 'step3-advanced') startFPSAnimation();
+                setTimeout(() => { next.style.opacity = '1'; next.style.transform = 'translateX(0)'; }, 50);
+            }, 400); 
+        }
+
+        function revealInline(btn, text, color = 'var(--multi-navy-light)') {
+            const span = document.createElement('span');
+            span.style.color = color; 
+            span.style.fontWeight = '900';
+            span.style.fontSize = '1.05rem';
+            span.style.backgroundColor = 'white'; 
+            span.style.padding = '2px 8px';
+            span.style.borderRadius = '8px';
+            span.style.boxShadow = `0 2px 5px ${color}40`; 
+            span.innerText = text;
+            btn.parentNode.replaceChild(span, btn);
+        }
+
+        /* --- 1단계: 동영상 원리 시각화 (플립북 효과) --- */
+        const vCanvas = document.getElementById('videoVisCanvas');
+        const vCtx = vCanvas.getContext('2d');
+        let vTick = 0;
+        let isDissected = false;
+
+        function drawBall(ctx, x, y, scaleX, scaleY) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale(scaleX, scaleY);
+            
+            ctx.fillStyle = 'rgba(0,0,0,0.1)';
+            ctx.beginPath();
+            ctx.ellipse(0, 20, 25, 5, 0, 0, Math.PI*2);
+            ctx.fill();
+
+            let grad = ctx.createRadialGradient(-5, -10, 5, 0, 0, 25);
+            grad.addColorStop(0, '#ffc048');
+            grad.addColorStop(1, '#f39c12');
+            
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(0, 0, 25, 0, Math.PI*2);
+            ctx.fill();
+            
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.beginPath();
+            ctx.arc(-8, -8, 6, 0, Math.PI*2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function drawVideoVisual() {
+            vCtx.clearRect(0, 0, 600, 300);
+
+            if (isDissected) {
+                const frameData = [
+                    { y: 80, sx: 1.0, sy: 1.0 },   
+                    { y: 150, sx: 0.9, sy: 1.1 },  
+                    { y: 220, sx: 1.0, sy: 1.0 },  
+                    { y: 230, sx: 1.3, sy: 0.7 },  
+                    { y: 170, sx: 0.95, sy: 1.05 } 
+                ];
+
+                for(let i = 0; i < 5; i++) {
+                    let frameX = 20 + i * 115;
+                    
+                    vCtx.fillStyle = '#ffffff';
+                    vCtx.shadowColor = 'rgba(0,0,0,0.15)';
+                    vCtx.shadowBlur = 10;
+                    vCtx.shadowOffsetY = 5;
+                    vCtx.fillRect(frameX, 20, 100, 250);
+                    vCtx.shadowColor = 'transparent';
+                    
+                    vCtx.fillStyle = '#f1f2f6';
+                    vCtx.fillRect(frameX + 5, 25, 90, 210);
+
+                    let d = frameData[i];
+                    // 위치 조정: 공을 약간 올림
+                    drawBall(vCtx, frameX + 50, d.y - 15, d.sx, d.sy);
+
+                    // 텍스트 라벨 (가려지지 않게 폰트 크기 및 위치 조정)
+                    vCtx.fillStyle = '#2f3542';
+                    vCtx.font = '900 13px "Pretendard"';
+                    vCtx.textAlign = 'center';
+                    vCtx.fillText(`${i+1} 프레임`, frameX + 50, 260); 
+                }
+
+            } else {
+                let time = (vTick % 60) / 60; 
+                let bounceY, scaleX = 1, scaleY = 1;
+
+                if (time < 0.45) {
+                    let t = time / 0.45;
+                    bounceY = 80 + (140 * t * t);
+                } else if (time < 0.55) {
+                    bounceY = 220;
+                    let t = (time - 0.45) / 0.1; 
+                    let squish = Math.sin(t * Math.PI); 
+                    scaleX = 1 + (0.3 * squish);
+                    scaleY = 1 - (0.3 * squish);
+                    bounceY += (10 * squish); 
+                } else {
+                    let t = (time - 0.55) / 0.45;
+                    bounceY = 220 - (140 * t * (2 - t)); 
+                }
+
+                vCtx.fillStyle = '#f1f2f6';
+                vCtx.fillRect(0, 0, 600, 300);
+
+                drawBall(vCtx, 300, bounceY, scaleX, scaleY);
+                
+                vCtx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+                vCtx.font = '800 20px Pretendard';
+                vCtx.textAlign = 'center';
+                vCtx.fillText("연속으로 빠르게 재생하면 움직이는 것처럼 보입니다!", 300, 40);
+            }
+
+            vTick++;
+            requestAnimationFrame(drawVideoVisual);
+        }
+        drawVideoVisual();
+
+        function toggleFilmScan() {
+            isDissected = !isDissected;
+            const btn = document.getElementById('btnDissect');
+            if(isDissected) {
+                btn.innerText = "▶️ 연속 재생하기 (애니메이션 확인)";
+                btn.style.background = "var(--soft-red)"; // 부드러운 붉은색으로 변경
+            } else {
+                btn.innerText = "🎞️ 프레임 분해하기 (정지 이미지 확인)";
+                btn.style.background = "var(--multi-navy)";
+            }
+        }
+
+        /* --- 4단계: 퀴즈 드래그 앤 드롭 --- */
+        let score = 0; const scored = new Set();
+        let correctAnswers = 0;
+        
+        function checkAns(el) {
+            if (el.value.trim() === el.getAttribute('data-answer') && !scored.has(el)) {
+                el.classList.add('blank-correct');
+                el.disabled = true; scored.add(el);
+                
+                correctAnswers++;
+                score += 16.6667; 
+                let dScore = Math.round(score); if(dScore >= 99) dScore = 100;
+                document.getElementById('currentScore').innerText = dScore;
+
+                const sb = document.getElementById('scoreBoard');
+                sb.classList.add('pulse');
+                setTimeout(() => { sb.classList.remove('pulse'); }, 300);
+
+                const toast = document.getElementById('toast');
+                toast.innerText = "정답입니다! 🎉";
+                toast.style.opacity = 1;
+                setTimeout(() => toast.style.opacity = 0, 1500);
+                
+                // 100점 달성 시 완료 모달 팝업
+                if(dScore === 100) { 
+                    setTimeout(() => { document.getElementById('modalOverlay').style.display = 'flex'; setStatus('done'); }, 800);
+                }
+            } else if (el.value.trim() !== "" && el.value.trim() !== el.getAttribute('data-answer')) {
+                el.classList.add('blank-error');
+                setTimeout(()=> el.classList.remove('blank-error'), 400);
+            }
+        }
+        function drag(ev) { ev.dataTransfer.setData("text", ev.target.innerText); }
+        function allowDrop(ev) { ev.preventDefault(); }
+        function drop(ev) { ev.preventDefault(); ev.target.value = ev.dataTransfer.getData("text"); checkAns(ev.target); }
+        function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; }
+
+
+        /* --- 3단계: FPS 시뮬레이터 (우주선 야간 비행 테마) --- */
+        const fCanvas = document.getElementById('fpsCanvas');
+        const fCtx = fCanvas.getContext('2d');
+        let currentFps = 60;
+        let lastFrameTime = 0;
+        let ufoX = -50;
+        let trailArray = []; 
+        let isSimRunning = false;
+
+        function updateFPS() {
+            currentFps = parseInt(document.getElementById('fpsSlider').value);
+            document.getElementById('fpsValDisplay').innerText = currentFps + ' fps';
+            trailArray = []; 
+        }
+
+        function drawUFO(ctx, x, y) {
+            ctx.save();
+            ctx.translate(x, y);
+            
+            let grad = ctx.createLinearGradient(0, 0, 0, 40);
+            grad.addColorStop(0, 'rgba(0, 210, 211, 0.4)');
+            grad.addColorStop(1, 'rgba(0, 210, 211, 0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.moveTo(-15, 10);
+            ctx.lineTo(15, 10);
+            ctx.lineTo(30, 50);
+            ctx.lineTo(-30, 50);
+            ctx.fill();
+
+            ctx.fillStyle = '#81ecec';
+            ctx.beginPath();
+            ctx.arc(0, -5, 15, Math.PI, 0);
+            ctx.fill();
+
+            ctx.fillStyle = '#ff9f43';
+            ctx.beginPath();
+            ctx.ellipse(0, 5, 25, 10, 0, 0, Math.PI*2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#2d3436';
+            ctx.beginPath();
+            ctx.arc(0, -8, 3, 0, Math.PI*2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function drawSim(timestamp) {
+            if (!isSimRunning) return;
+            
+            const timeSinceLastFrame = timestamp - lastFrameTime;
+            if (timeSinceLastFrame >= 1000 / currentFps) {
+                lastFrameTime = timestamp - (timeSinceLastFrame % (1000/currentFps)); 
+                
+                const baseSpeed = 4.5; 
+                const moveStep = baseSpeed * (60 / currentFps); 
+                
+                ufoX += moveStep;
+                
+                if(ufoX > 550) {
+                    ufoX = -50;
+                    trailArray = [];
+                }
+                
+                let waveY = 125 + Math.sin(ufoX * 0.03) * 40;
+                
+                trailArray.push({x: ufoX, y: waveY});
+                if(trailArray.length > 80) trailArray.shift(); 
+            }
+
+            fCtx.fillStyle = '#1e272e';
+            fCtx.fillRect(0, 0, 500, 250);
+            
+            fCtx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            fCtx.lineWidth = 1;
+            for(let i=0; i<=500; i+=50) { fCtx.beginPath(); fCtx.moveTo(i, 0); fCtx.lineTo(i, 250); fCtx.stroke(); }
+            for(let i=0; i<=250; i+=50) { fCtx.beginPath(); fCtx.moveTo(0, i); fCtx.lineTo(500, i); fCtx.stroke(); }
+            
+            for(let i=0; i<trailArray.length; i++) {
+                let pt = trailArray[i];
+                fCtx.fillStyle = '#00d2d3'; 
+                fCtx.shadowBlur = 10;
+                fCtx.shadowColor = '#00d2d3';
+                fCtx.beginPath(); 
+                fCtx.arc(pt.x, pt.y, 4, 0, Math.PI*2); 
+                fCtx.fill();
+            }
+            fCtx.shadowBlur = 0; 
+
+            if (trailArray.length > 0) {
+                let lastPos = trailArray[trailArray.length - 1];
+                drawUFO(fCtx, lastPos.x, lastPos.y);
+            }
+            
+            requestAnimationFrame(drawSim);
+        }
+
+        function startFPSAnimation() {
+            if(!isSimRunning) {
+                isSimRunning = true;
+                requestAnimationFrame(drawSim);
+            }
+        }
+
+        function checkMission() {
+            const inputVal = document.getElementById('missionInput').value.trim();
+            // 계산: 2MB * 30fps * 10초 = 600MB
+            if (inputVal === "600") {
+                document.getElementById('missionInput').style.backgroundColor = '#d4edda';
+                document.getElementById('missionInput').style.borderColor = '#28a745';
+                document.getElementById('missionInput').style.color = '#155724';
+                
+                const toast = document.getElementById('toast');
+                toast.innerText = "수사 미션 성공! 🎉 다음 단계 퀴즈로 넘어가세요.";
+                toast.style.opacity = 1;
+                setTimeout(() => toast.style.opacity = 0, 2500);
+            } else {
+                showCustomAlert("❌ 오답입니다!\n\n힌트: (이미지 1장의 용량) × (1초당 프레임 수) × (시간 초)\n수식을 떠올려 보세요.");
+                document.getElementById('missionInput').value = '';
+                document.getElementById('missionInput').focus();
+            }
+        }
+        
+        window.onload = function() {
+            const wordBank = document.querySelector('.word-bank');
+            if(wordBank) {
+                for (let i = wordBank.children.length; i >= 0; i--) {
+                    wordBank.appendChild(wordBank.children[Math.random() * i | 0]);
+                }
+            }
+        };
+    </script>
+</body>
+</html>
