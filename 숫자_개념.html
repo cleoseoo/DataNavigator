@@ -318,11 +318,10 @@
         .nav-arrow:active { transform: translateY(1px); } .nav-arrow svg { width: 30px; height: 30px; fill: #0071e3; }
         .nav-arrow.next { margin-left: auto; } .nav-arrow.prev { margin-right: auto; }
 
-        /* ⭐ 리포트 저장 버튼 CSS ⭐ */
+        /* ⭐ 리포트 저장 버튼 CSS (HTML + PNG) ⭐ */
         .report-btn {
             background: linear-gradient(135deg, var(--apple-blue), var(--sky-blue));
             color: white !important; box-shadow: 0 4px 15px rgba(0, 113, 227, 0.3);
-            margin-left: auto;
         }
         .report-btn div { color: white !important; }
         .report-btn:hover {
@@ -330,10 +329,20 @@
             color: white; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 113, 227, 0.4);
         }
 
+        .img-report-btn {
+            background: linear-gradient(135deg, var(--ocean-blue), var(--sky-blue));
+            color: white !important; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.3);
+        }
+        .img-report-btn div { color: white !important; }
+        .img-report-btn:hover {
+            background: linear-gradient(135deg, #0369a1, var(--ocean-blue));
+            color: white; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(2, 132, 199, 0.4);
+        }
+
         /* 4단계 퀴즈 UI (타이머 및 버튼 추가) */
         .quiz-controls-row { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 25px; }
         
-        /* ⭐ 미션 가이드 (네모 -> 라운드 애니메이션) ⭐ */
+        /* ⭐ 미션 가이드 ⭐ */
         .inline-tip { 
             background: white; color: var(--apple-blue); border: 2px solid var(--apple-blue); 
             padding: 8px 20px; border-radius: 8px; font-weight: 900; font-size: 0.95rem; 
@@ -422,9 +431,9 @@
         @keyframes popUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
         /* ⭐ 커스텀 에러 알림창 전용 스타일 ⭐ */
-       .alert-box { background: white; border-radius: 28px; border: 2px solid var(--apple-red) !important; width: 400px; box-shadow: 0 0 30px rgba(239, 68, 68, 0.3) !important; padding: 30px 27px; text-align: center; animation: popUp 0.3s ease-out;}
+        .alert-box { background: white; border-radius: 28px; border: 2px solid var(--apple-red) !important; width: 400px; box-shadow: 0 0 30px rgba(239, 68, 68, 0.3) !important; padding: 30px; text-align: center; animation: popUp 0.3s ease-out;}
         .alert-box h3 { color: var(--apple-red); font-size: 1.5rem; margin-top: 0; margin-bottom: 15px; font-weight: 900; }
-        .alert-message { color: var(--text-main); font-size: 1.05rem; line-height: 1.6; margin-bottom: 25px; word-break: keep-all; font-weight: 600; }
+        .alert-message { color: var(--text-main); font-size: 1.05rem; line-height: 1.6; margin-bottom: 25px; word-break: keep-all; font-weight: 600; white-space: pre-line;}
     </style>
 </head>
 <body>
@@ -722,7 +731,8 @@
                 </div>
 
                 <div id="step4-quiz" class="step-container">
-                    
+                    <div style="font-size: 1.3rem; font-weight: 900; color: var(--apple-red); margin-bottom: 25px;">🎯 최종 퀴즈: 숫자의 디지털 표현 마스터하기!</div>
+
                     <div class="quiz-controls-row">
                         <div class="inline-tip" onclick="openTipPopup()">
                             <svg viewBox="0 0 24 24" fill="currentColor" style="width:18px; height:18px;"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6C7.8 12.16 7 10.63 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z"/></svg>
@@ -774,8 +784,13 @@
                             <div>이전 (이진수를 십진수로 변환)</div>
                         </div>
                         
-                        <div class="nav-arrow report-btn" onclick="downloadReportHTML()">
-                            <div>📄 수업 결과 리포트 저장</div>
+                        <div style="display: flex; gap: 10px; margin-left: auto;">
+                            <div class="nav-arrow report-btn" onclick="downloadReportHTML()">
+                                <div>📄 웹문서 저장</div>
+                            </div>
+                            <div class="nav-arrow img-report-btn" onclick="downloadReportImageOffline()">
+                                <div>🖼️ 이미지(PNG) 저장</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -850,7 +865,6 @@
                 overlay.style.opacity = '0';
                 setTimeout(() => { overlay.style.display = 'none'; }, 500); 
             } else {
-                // 기존 브라우저 alert 대신 커스텀 팝업 사용
                 showCustomAlert("접근 거부!", `힌트: 오늘 날짜(${today}일)를 이진수로 변환해 보세요.`);
                 document.getElementById('lockInput').value = '';
             }
@@ -1110,7 +1124,7 @@
             document.getElementById('modalOverlay').style.display = 'flex';
         }
 
-        // ⭐ 팝업창 정보 업데이트 (점수, 시간) ⭐
+        // ⭐ 팝업창 정보 업데이트 (저장 버튼 제거 및 심플화) ⭐
         function showSuccess() {
             const m = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
             const s = String(elapsedSeconds % 60).padStart(2, '0');
@@ -1126,12 +1140,9 @@
                     <p style="margin:5px 0; font-size:1.1rem; font-weight:800;">풀이 시간: <span style="color:var(--apple-blue); font-size:1.3rem;">${m}분 ${s}초</span></p>
                 </div>
 
-                <p style="font-size:0.95rem; color:#555; margin-bottom:20px;">컴퓨터가 숫자를 기억하는 이진수의 원리를 완벽하게 풀었습니다!<br>아래 버튼을 눌러 <b>수업 결과 리포트</b>를 저장하세요.</p>
+                <p style="font-size:0.95rem; color:#555; margin-bottom:20px;">컴퓨터가 숫자를 기억하는 이진수의 원리를 완벽하게 풀었습니다!<br>창을 닫고 우측 하단의 버튼을 눌러 리포트를 저장하세요.</p>
                 
-                <div style="display:flex; gap:10px;">
-                    <button onclick="downloadReportHTML()" style="flex:1; padding:14px; background:var(--apple-blue); color:white; border:none; border-radius:12px; font-weight:900; cursor:pointer; box-shadow: 0 4px 15px rgba(0, 113, 227, 0.3);">📄 리포트 저장 (웹문서)</button>
-                    <button onclick="closeModal()" style="padding:14px 20px; background:#e5e5e7; color:#333; border:none; border-radius:12px; font-weight:700; cursor:pointer;">닫기</button>
-                </div>
+                <button onclick="closeModal()" style="width:100%; padding:14px; background:var(--apple-blue); color:white; border:none; border-radius:12px; font-weight:700; font-size:1.1rem; cursor:pointer;">확인 및 닫기</button>
             `;
             document.getElementById('modalOverlay').style.display = 'flex';
             setStatus('done'); 
@@ -1198,6 +1209,134 @@
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
             link.download = "숫자의_디지털표현_학습결과.html";
+            link.click();
+        }
+
+        // ⭐ 순수 오프라인 PNG 이미지 생성 및 다운로드 ⭐
+        function downloadReportImageOffline() {
+            const finalScore = score;
+            const memo = document.getElementById('memoInput').value || "작성된 내용이 없습니다.";
+            const reflection = document.getElementById('reflectionInput').value || "작성된 내용이 없습니다.";
+            const dateStr = new Date().toLocaleString('ko-KR');
+            const m = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
+            const s = String(elapsedSeconds % 60).padStart(2, '0');
+            const timeStr = isQuizStarted ? `${m}분 ${s}초` : "측정 불가";
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 800;
+            
+            function getLines(text, maxWidth) {
+                ctx.font = "18px sans-serif";
+                const lines = [];
+                const paragraphs = text.split('\n');
+                paragraphs.forEach(p => {
+                    let currentLine = '';
+                    for(let i=0; i<p.length; i++) {
+                        const char = p[i];
+                        const testLine = currentLine + char;
+                        if(ctx.measureText(testLine).width > maxWidth && i > 0) {
+                            lines.push(currentLine);
+                            currentLine = char;
+                        } else {
+                            currentLine = testLine;
+                        }
+                    }
+                    lines.push(currentLine);
+                });
+                return lines;
+            }
+
+            const memoLines = getLines(memo, 620);
+            const reflectionLines = getLines(reflection, 620);
+            
+            const totalHeight = 500 + (memoLines.length * 28) + (reflectionLines.length * 28) + 100;
+            canvas.height = totalHeight;
+            
+            // Background
+            ctx.fillStyle = '#f0f9ff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // White card
+            ctx.fillStyle = '#ffffff';
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.roundRect(40, 40, 720, totalHeight - 80, 24);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Title
+            ctx.fillStyle = '#0071e3';
+            ctx.font = "bold 32px sans-serif";
+            ctx.textAlign = 'center';
+            ctx.fillText("[데이터 비트박스] 학습 결과 리포트", 400, 100);
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(230, 120); ctx.lineTo(570, 120); ctx.stroke();
+            
+            // Info Box
+            ctx.fillStyle = '#f8fafc';
+            ctx.beginPath(); ctx.roundRect(70, 150, 660, 150, 16); ctx.fill();
+            ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.5; ctx.setLineDash([5, 5]); ctx.stroke();
+            ctx.setLineDash([]);
+            
+            ctx.textAlign = 'left';
+            ctx.font = "bold 20px sans-serif";
+            ctx.fillStyle = '#1d1d1f';
+            ctx.fillText("▶ 단원명: 3. 숫자의 디지털 표현", 100, 195);
+            ctx.fillText("▶ 일시: " + dateStr, 100, 235);
+            ctx.fillStyle = '#ff2d55';
+            ctx.fillText("▶ 퀴즈 점수: " + finalScore + " 점", 100, 275);
+            ctx.fillStyle = '#0071e3';
+            ctx.fillText("▶ 풀이 시간: " + timeStr, 400, 275);
+            
+            let currentY = 350;
+            
+            // Memo
+            ctx.fillStyle = '#0284c7';
+            ctx.font = "bold 24px sans-serif";
+            ctx.fillText("📌 학습 메모장", 70, currentY);
+            currentY += 25;
+            
+            ctx.fillStyle = '#f0f9ff';
+            const memoBoxHeight = (memoLines.length * 28) + 40;
+            ctx.beginPath(); ctx.roundRect(70, currentY, 660, memoBoxHeight, 12); ctx.fill();
+            ctx.strokeStyle = '#e0f2fe'; ctx.stroke();
+            
+            ctx.fillStyle = '#334155';
+            ctx.font = "18px sans-serif";
+            currentY += 35;
+            memoLines.forEach(line => { ctx.fillText(line, 90, currentY); currentY += 28; });
+            currentY += 40; 
+            
+            // Reflection
+            ctx.fillStyle = '#0284c7';
+            ctx.font = "bold 24px sans-serif";
+            ctx.fillText("🌿 학습 활동 소감", 70, currentY);
+            currentY += 25;
+            
+            ctx.fillStyle = '#f0f9ff';
+            const refBoxHeight = (reflectionLines.length * 28) + 40;
+            ctx.beginPath(); ctx.roundRect(70, currentY, 660, refBoxHeight, 12); ctx.fill();
+            ctx.strokeStyle = '#e0f2fe'; ctx.stroke();
+            
+            ctx.fillStyle = '#334155';
+            ctx.font = "18px sans-serif";
+            currentY += 35;
+            reflectionLines.forEach(line => { ctx.fillText(line, 90, currentY); currentY += 28; });
+            
+            // Footer
+            currentY += 70;
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = "bold 16px sans-serif";
+            ctx.textAlign = 'center';
+            ctx.fillText("본 리포트는 '데이터 비트박스' 시스템에서 자동 생성되었습니다.", 400, currentY);
+            
+            // Download
+            const link = document.createElement('a');
+            link.download = '숫자의_디지털표현_리포트.png';
+            link.href = canvas.toDataURL('image/png');
             link.click();
         }
 
