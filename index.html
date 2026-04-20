@@ -302,15 +302,33 @@
             `;
         }
 
-        // 2. 저작권/안내 '알림' 팝업 띄우기
+      // 2. 저작권/안내 '알림' 팝업 띄우기
         function openInfoModal() {
-            mIcon.innerText = "ℹ️";
-            mTitle.innerText = "안내";
+            mIcon.innerText = "ⓒ";
+            mTitle.innerText = "저작권 및 출처 안내";
             mTitle.style.color = "var(--theme-blue)";
-            mDesc.innerHTML = "저작권 및 출처 안내 페이지를 연결할 예정입니다.";
+            
+            // 저작권 내용을 깔끔한 HTML 구조로 삽입
+            mDesc.innerHTML = `
+                <div style="text-align: left; font-size: 0.9rem; line-height: 1.6; color: #424245;">
+                    <p style="margin-top:0;">본 <b>'데이터 비트박스'</b> 프로그램은 교육 목적으로 제작되었으며, 외부 유료 이미지 파일을 전혀 사용하지 않은 프로그램입니다.</p>
+                    
+                    <div style="background: #f5f5f7; padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+                        <strong style="color: var(--theme-blue); font-size: 1rem;">1. 자체 제작 콘텐츠 (100% Coding Art)</strong><br>
+                        스마트 시티, AI 로봇, 소리 파형, 벡터 애플, 동영상 프레임 애니메이션 및 게임 등 모든 인터랙티브 시각 자료는 CSS와 JavaScript Canvas API를 활용해 <b>코드로 드로잉한 순수 창작물</b>입니다.
+                    일부는 Google(Gemini) & OpenAI(Chat GPT) 생성형 코드입니다.</div>
+
+                    <div style="background: #f5f5f7; padding: 15px; border-radius: 12px;">
+                        <strong style="color: var(--theme-violet); font-size: 1rem;">2. 오픈소스 라이선스 (Open Source)</strong><br>
+                        • <b>UI 아이콘:</b> Google Material Icons (Apache License 2.0)<br>
+                        • <b>로고 아이콘:</b> Feather Icons (MIT License)<br>
+                        • <b>웹 폰트:</b> Pretendard, JetBrains Mono, Orbitron (OFL)
+                    </div>
+                </div>
+            `;
             
             mBtns.innerHTML = `
-                <button class="modal-btn primary" onclick="closeModal()">확인</button>
+                <button class="modal-btn primary" onclick="closeModal()">확인했습니다</button>
             `;
             
             modal.style.display = 'flex';
