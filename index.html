@@ -4,541 +4,637 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>데이터 비트박스 - 메인</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700;900&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* ════════════════════════════════════════
-           🎨 테마 변수
-        ════════════════════════════════════════ */
         :root {
-            --bg-color: #f0f2f5;
-            --text-main: #1d1d1f;
-            --text-sub: #86868b;
-            --card-bg: rgba(255, 255, 255, 0.9);
-
-            --theme-mint: #10b981;
-            --theme-mint-light: #d1fae5;
-            --theme-blue: #0071e3;
-            --theme-blue-light: #dbeafe;
-            --theme-violet: #6c5ce7;
-            --theme-navy: #1e3799;
-            --theme-multi-light: #ede7f6;
+            --void: #03050d;
+            --cosmos: #060d1f;
+            --nebula-1: #0a1628;
+            --mint: #00f5c4;
+            --mint-dim: rgba(0,245,196,0.12);
+            --blue: #0a84ff;
+            --blue-dim: rgba(10,132,255,0.12);
+            --violet: #bf5af2;
+            --violet-dim: rgba(191,90,242,0.12);
+            --navy: #1e3799;
+            --navy-dim: rgba(30,55,153,0.15);
+            --gold: #ffd60a;
+            --red: #ff453a;
+            --white: #f0f4ff;
+            --glass: rgba(255,255,255,0.04);
+            --glass-border: rgba(255,255,255,0.08);
         }
 
-        /* ════════════════════════════════════════
-           스크롤바
-        ════════════════════════════════════════ */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg-color); }
-        ::-webkit-scrollbar-thumb { background: #c7c7cc; border-radius: 10px; }
-
-        /* ════════════════════════════════════════
-           기본 레이아웃
-        ════════════════════════════════════════ */
-        *, *::before, *::after { box-sizing: border-box; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         html, body {
-            margin: 0; padding: 0; height: 100%;
+            height: 100%; overflow-x: hidden;
             font-family: 'Noto Sans KR', sans-serif;
-            background-color: var(--bg-color);
-            /* 배경 메시 그라디언트 (고급감 향상) */
-            background-image:
-                radial-gradient(ellipse at 0% 0%,   rgba(0, 113, 227, 0.07)  0px, transparent 55%),
-                radial-gradient(ellipse at 100% 0%,  rgba(16, 185, 129, 0.06) 0px, transparent 50%),
-                radial-gradient(ellipse at 100% 100%,rgba(108, 92, 231, 0.07) 0px, transparent 55%);
-            display: flex; flex-direction: column; overflow-x: hidden;
-            color: var(--text-main);
+            background: var(--void);
+            color: var(--white);
+            cursor: default;
         }
 
-        /* 이진수 ambient 배경 캔버스 */
-        #binaryCanvas {
+        /* ── CANVAS LAYERS ── */
+        #starCanvas, #gridCanvas, #particleCanvas {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+        }
+        #starCanvas    { z-index: 0; }
+        #gridCanvas    { z-index: 1; opacity: 0.35; }
+        #particleCanvas{ z-index: 2; }
+
+        /* ── SCAN LINE ── */
+        .scanline {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 0; opacity: 0.025;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,245,196,0.015) 2px,
+                rgba(0,245,196,0.015) 4px
+            );
+            pointer-events: none; z-index: 3;
+            animation: scanMove 8s linear infinite;
+        }
+        @keyframes scanMove {
+            0%  { background-position: 0 0; }
+            100%{ background-position: 0 200px; }
         }
 
-        /* ════════════════════════════════════════
-           헤더
-        ════════════════════════════════════════ */
-        header {
-            position: sticky; top: 0; z-index: 5000;
-            background: rgba(255, 255, 255, 0.78);
-            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-            border-bottom: 1px solid rgba(0,0,0,0.06);
-            padding: 0 40px;
+        /* ── NOISE GRAIN ── */
+        body::after {
+            content: '';
+            position: fixed; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none; z-index: 4; opacity: 0.6;
+        }
+
+        /* ── LAYOUT ── */
+        #app {
+            position: relative; z-index: 10;
+            min-height: 100vh;
             display: flex; flex-direction: column;
+        }
+
+        /* ════════════════════════════════
+           HEADER
+        ════════════════════════════════ */
+        header {
+            position: sticky; top: 0; z-index: 1000;
+            background: rgba(3,5,13,0.82);
+            backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+            border-bottom: 1px solid rgba(0,245,196,0.18);
+            padding: 0 44px;
+            box-shadow: 0 0 60px rgba(0,245,196,0.06);
         }
 
         .header-main {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 14px 0;
+            padding: 13px 0;
         }
 
-        .header-left { display: flex; align-items: center; gap: 14px; }
+        .header-left { display: flex; align-items: center; gap: 18px; }
 
-        .target-badge {
-            background: #1d1d1f; color: white;
-            padding: 4px 11px; border-radius: 8px;
-            font-size: 0.72rem; font-weight: 700; letter-spacing: 0.5px;
+        .badge-target {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem; font-weight: 700; letter-spacing: 2px;
+            padding: 4px 10px; border-radius: 4px;
+            background: rgba(0,245,196,0.1);
+            border: 1px solid rgba(0,245,196,0.3);
+            color: var(--mint);
+            text-transform: uppercase;
         }
 
-        .main-title {
-            font-size: 1.35rem; font-weight: 900; margin: 0;
-            letter-spacing: -0.03em;
+        .site-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2rem; font-weight: 900; letter-spacing: 0.05em;
+            color: var(--white);
+            text-shadow: 0 0 30px rgba(0,245,196,0.4);
         }
+        .site-title span { color: var(--mint); }
 
-        .status-controller { display: flex; gap: 8px; }
-
-        .status-btn {
-            padding: 8px 16px; border-radius: 20px;
-            font-weight: 700; font-size: 0.83rem;
-            font-family: 'Noto Sans KR', sans-serif;
-            border: 1px solid rgba(0,0,0,0.1); background: white;
-            color: var(--text-main); cursor: pointer;
+        .reset-btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem; font-weight: 700; letter-spacing: 1px;
+            padding: 8px 18px; border-radius: 6px;
+            background: transparent;
+            border: 1px solid rgba(255,69,58,0.4);
+            color: rgba(255,99,89,0.85);
+            cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
         }
-        .status-btn:hover {
-            background: #fff0f0;
-            border-color: rgba(255, 59, 48, 0.35);
-            color: #ff3b30;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255,59,48,0.1);
+        .reset-btn:hover {
+            background: rgba(255,69,58,0.12);
+            border-color: var(--red);
+            color: var(--red);
+            box-shadow: 0 0 20px rgba(255,69,58,0.2);
         }
 
-        /* ── 헤더 하단: 전체 진행률 바 ── */
-        .progress-bar-wrap {
-            padding-bottom: 10px;
-            display: flex; align-items: center; gap: 12px;
+        /* Progress strip */
+        .progress-strip {
+            padding: 8px 0 10px;
+            display: flex; align-items: center; gap: 14px;
         }
-        .progress-label {
-            font-size: 0.72rem; font-weight: 700; color: var(--text-sub);
-            white-space: nowrap;
+        .prog-label {
             font-family: 'JetBrains Mono', monospace;
+            font-size: 0.62rem; letter-spacing: 3px;
+            color: rgba(255,255,255,0.3); white-space: nowrap;
+            text-transform: uppercase;
         }
-        .progress-segments {
-            display: flex; gap: 4px; flex: 1;
+        .prog-segs { display: flex; gap: 5px; flex: 1; }
+        .prog-seg {
+            flex: 1; height: 3px; border-radius: 2px;
+            background: rgba(255,255,255,0.08);
+            transition: background 0.6s ease, transform 0.3s ease, box-shadow 0.6s;
+            position: relative;
         }
-        .progress-seg {
-            flex: 1; height: 5px; border-radius: 3px;
-            background: #e5e5ea;
-            transition: background 0.5s ease, transform 0.3s ease;
+        .prog-seg.done {
+            transform: scaleY(2);
+            box-shadow: 0 0 8px currentColor;
         }
-        .progress-seg.done { background: var(--theme-mint); transform: scaleY(1.3); }
-        .progress-count {
-            font-size: 0.72rem; font-weight: 700;
+        .prog-count {
             font-family: 'JetBrains Mono', monospace;
-            color: var(--theme-mint);
+            font-size: 0.68rem; font-weight: 700;
             white-space: nowrap;
+            transition: color 0.5s;
         }
 
-        /* ════════════════════════════════════════
-           메인 콘텐츠
-        ════════════════════════════════════════ */
+        /* ════════════════════════════════
+           MAIN
+        ════════════════════════════════ */
         main {
-            flex: 1; position: relative; z-index: 1;
+            flex: 1;
             display: flex; flex-direction: column; align-items: center;
-            padding: 64px 20px 80px;
+            padding: 70px 24px 100px;
         }
 
-        /* ── Hero ── */
-        .hero-section {
-            text-align: center; margin-bottom: 56px;
-            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+        /* ── HERO ── */
+        .hero {
+            text-align: center;
+            margin-bottom: 72px;
+            animation: heroIn 1.2s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        @keyframes heroIn {
+            from { opacity:0; transform: translateY(40px); }
+            to   { opacity:1; transform: translateY(0); }
         }
 
-        .hero-eyebrow {
-            display: inline-flex; align-items: center; gap: 6px;
+        .hero-chip {
+            display: inline-flex; align-items: center; gap: 8px;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.72rem; font-weight: 600; letter-spacing: 2.5px;
-            color: var(--theme-blue); text-transform: uppercase;
-            background: var(--theme-blue-light); padding: 5px 12px; border-radius: 20px;
-            margin-bottom: 18px;
+            font-size: 0.68rem; letter-spacing: 3px;
+            color: var(--mint); text-transform: uppercase;
+            background: var(--mint-dim);
+            border: 1px solid rgba(0,245,196,0.25);
+            padding: 6px 16px; border-radius: 20px;
+            margin-bottom: 22px;
         }
+        .hero-chip::before {
+            content: '';
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--mint);
+            box-shadow: 0 0 10px var(--mint);
+            animation: pulse 1.8s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
 
         .hero-title {
-            font-size: 3rem; font-weight: 900;
-            margin: 0 0 16px; letter-spacing: -0.05em;
-            line-height: 1.15;
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(2rem, 5vw, 3.4rem);
+            font-weight: 900; line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin-bottom: 20px;
+        }
+        .hero-title .line1 { display: block; color: var(--white); }
+        .hero-title .line2 {
+            display: block;
+            background: linear-gradient(90deg, var(--mint), var(--blue), var(--violet));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-size: 200%;
+            animation: gradShift 4s linear infinite;
+        }
+        @keyframes gradShift {
+            0%  { background-position: 0% 50%; }
+            100%{ background-position: 200% 50%; }
         }
 
-        /* 타이핑 커서 효과 */
-        .typed-text { color: var(--theme-blue); }
+        /* cursor */
+        .typed-text { }
         .typed-cursor {
-            display: inline-block; width: 3px; height: 1em;
-            background: var(--theme-blue); margin-left: 2px;
-            vertical-align: middle; border-radius: 2px;
-            animation: blink 0.9s step-end infinite;
+            display: inline-block; width: 3px; height: 0.9em;
+            background: var(--mint); margin-left: 2px;
+            vertical-align: middle; border-radius: 1px;
+            box-shadow: 0 0 12px var(--mint);
+            animation: blink 0.85s step-end infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+
+        .hero-sub {
+            font-size: 1rem; font-weight: 500;
+            color: rgba(240,244,255,0.5);
+            line-height: 1.7; max-width: 540px; margin: 0 auto;
         }
 
-        .hero-subtitle {
-            font-size: 1.1rem; font-weight: 600;
-            color: var(--text-sub); margin: 0; line-height: 1.6;
-        }
-
-        /* ── Pillar 그리드 ── */
-        .pillar-container {
-            display: grid; grid-template-columns: repeat(3, 1fr);
-            gap: 28px; width: 100%; max-width: 1160px;
+        /* ── PILLAR GRID ── */
+        .pillars {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px; width: 100%; max-width: 1200px;
         }
 
         .pillar {
-            background: var(--card-bg);
-            border: 1px solid rgba(255,255,255,0.9);
-            border-radius: 28px; padding: 34px 26px;
-            box-shadow: 0 12px 32px rgba(0,0,0,0.04);
+            position: relative;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 32px 28px 28px;
             display: flex; flex-direction: column;
-            backdrop-filter: blur(12px);
-            transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
-            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
-            position: relative; overflow: hidden;
+            overflow: hidden;
+            transition: transform 0.4s cubic-bezier(0.16,1,0.3,1),
+                        border-color 0.4s, box-shadow 0.4s;
+            animation: cardIn 0.9s cubic-bezier(0.16,1,0.3,1) both;
+            cursor: default;
+            /* 3D tilt prep */
+            transform-style: preserve-3d;
+        }
+        .pillar:nth-child(1){ animation-delay: 0.15s; }
+        .pillar:nth-child(2){ animation-delay: 0.28s; }
+        .pillar:nth-child(3){ animation-delay: 0.41s; }
+
+        @keyframes cardIn {
+            from { opacity:0; transform: translateY(50px) scale(0.96); }
+            to   { opacity:1; transform: translateY(0)   scale(1); }
         }
 
-        /* 상단 컬러 바 */
+        /* top glow bar */
         .pillar::before {
             content: ''; position: absolute;
-            top: 0; left: 0; right: 0; height: 5px;
-            opacity: 0.85; transition: height 0.35s ease;
+            top: 0; left: 0; right: 0; height: 2px;
+            transition: height 0.4s ease, opacity 0.4s;
+            opacity: 0.7;
         }
-        .pillar:hover::before { height: 7px; }
+        .pillar:hover::before { height: 3px; opacity: 1; }
 
-        /* 배경 블롭 (각 파트별 분위기) */
+        /* inner glow blob */
         .pillar::after {
             content: ''; position: absolute;
-            width: 200px; height: 200px; border-radius: 50%;
-            bottom: -80px; right: -60px;
-            opacity: 0; transition: opacity 0.45s ease;
-            filter: blur(50px); pointer-events: none;
+            width: 280px; height: 280px; border-radius: 50%;
+            bottom: -120px; right: -80px;
+            filter: blur(70px);
+            opacity: 0; transition: opacity 0.5s ease;
+            pointer-events: none;
         }
-        .pillar:hover::after { opacity: 1; }
+        .pillar:hover::after { opacity: 0.18; }
 
-        .pillar:nth-child(1) { animation-delay: 0.1s; }
-        .pillar:nth-child(2) { animation-delay: 0.2s; }
-        .pillar:nth-child(3) { animation-delay: 0.3s; }
+        /* MINT pillar */
+        .pillar.p-mint::before { background: linear-gradient(90deg, var(--mint), #00c9a7); }
+        .pillar.p-mint::after  { background: var(--mint); }
+        .pillar.p-mint:hover {
+            border-color: rgba(0,245,196,0.35);
+            box-shadow: 0 0 60px rgba(0,245,196,0.1), 0 30px 60px rgba(0,0,0,0.4);
+            transform: translateY(-8px);
+        }
 
-        /* Mint */
-        .pillar.theme-mint::before { background: var(--theme-mint); }
-        .pillar.theme-mint::after  { background: var(--theme-mint); }
-        .pillar.theme-mint:hover   { transform: translateY(-10px); box-shadow: 0 28px 50px rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.25); }
-        .pillar.theme-mint .pillar-header { color: var(--theme-mint); }
+        /* BLUE pillar */
+        .pillar.p-blue::before { background: linear-gradient(90deg, var(--blue), #5ac8fa); }
+        .pillar.p-blue::after  { background: var(--blue); }
+        .pillar.p-blue:hover {
+            border-color: rgba(10,132,255,0.35);
+            box-shadow: 0 0 60px rgba(10,132,255,0.1), 0 30px 60px rgba(0,0,0,0.4);
+            transform: translateY(-8px);
+        }
 
-        /* Blue */
-        .pillar.theme-blue::before { background: var(--theme-blue); }
-        .pillar.theme-blue::after  { background: var(--theme-blue); }
-        .pillar.theme-blue:hover   { transform: translateY(-10px); box-shadow: 0 28px 50px rgba(0,113,227,0.1); border-color: rgba(0,113,227,0.25); }
-        .pillar.theme-blue .pillar-header { color: var(--theme-blue); }
+        /* VIOLET pillar */
+        .pillar.p-violet::before { background: linear-gradient(90deg, var(--violet), #e040fb, var(--navy)); }
+        .pillar.p-violet::after  { background: var(--violet); }
+        .pillar.p-violet:hover {
+            border-color: rgba(191,90,242,0.35);
+            box-shadow: 0 0 60px rgba(191,90,242,0.1), 0 30px 60px rgba(0,0,0,0.4);
+            transform: translateY(-8px);
+        }
 
-        /* Violet */
-        .pillar.theme-violet::before { background: linear-gradient(90deg, var(--theme-violet), var(--theme-navy)); }
-        .pillar.theme-violet::after  { background: var(--theme-violet); }
-        .pillar.theme-violet:hover   { transform: translateY(-10px); box-shadow: 0 28px 50px rgba(108,92,231,0.1); border-color: rgba(108,92,231,0.25); }
-        .pillar.theme-violet .pillar-header {
-            background: linear-gradient(90deg, var(--theme-violet), var(--theme-navy));
+        /* pillar header */
+        .pillar-eyebrow {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.62rem; letter-spacing: 3px;
+            text-transform: uppercase; margin-bottom: 18px;
+            opacity: 0.6;
+        }
+        .p-mint  .pillar-eyebrow { color: var(--mint); }
+        .p-blue  .pillar-eyebrow { color: var(--blue); }
+        .p-violet .pillar-eyebrow {
+            background: linear-gradient(90deg, var(--violet), var(--navy));
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
 
-        .pillar-icon { font-size: 2.4rem; margin-bottom: 18px; display: inline-block; }
-        .pillar-header { font-size: 0.78rem; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 6px; font-family: 'JetBrains Mono', monospace; }
-        .pillar-title { font-size: 1.35rem; font-weight: 900; margin: 0 0 10px; }
-        .pillar-desc { font-size: 0.875rem; font-weight: 500; color: var(--text-sub); line-height: 1.65; margin-bottom: 24px; }
+        .pillar-icon {
+            font-size: 2.2rem; margin-bottom: 14px;
+            display: inline-block; line-height: 1;
+            filter: drop-shadow(0 0 12px currentColor);
+        }
 
-        /* ── Step 아이템 (a 태그로 접근성 개선) ── */
-        .step-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+        .pillar-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.05rem; font-weight: 700;
+            letter-spacing: 0.02em; margin-bottom: 10px;
+            color: var(--white);
+        }
+
+        .pillar-desc {
+            font-size: 0.82rem; font-weight: 400;
+            color: rgba(240,244,255,0.45);
+            line-height: 1.65; margin-bottom: 24px;
+        }
+
+        /* step list */
+        .step-list { list-style: none; display: flex; flex-direction: column; gap: 8px; flex: 1; }
 
         .step-item {
-            background: #ffffff;
-            border: 1px solid rgba(0,0,0,0.05);
-            padding: 14px 16px; border-radius: 16px;
-            font-weight: 700; font-size: 0.92rem;
-            cursor: pointer;
-            /* ✅ FIX: a 태그 스타일 */
-            text-decoration: none; color: var(--text-main);
             display: flex; align-items: center; justify-content: space-between;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-            transition: all 0.2s ease;
-            position: relative;
+            text-decoration: none; color: rgba(240,244,255,0.85);
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px; padding: 12px 14px;
+            font-weight: 600; font-size: 0.88rem;
+            transition: all 0.22s ease;
+            position: relative; overflow: hidden;
         }
+        .step-item::before {
+            content: ''; position: absolute;
+            left: 0; top: 0; bottom: 0; width: 0;
+            transition: width 0.3s ease;
+            opacity: 0.08;
+        }
+        .step-item:hover::before { width: 100%; }
 
-        .step-item-left { display: flex; align-items: center; gap: 2px; }
+        .p-mint  .step-item::before { background: var(--mint); }
+        .p-blue  .step-item::before { background: var(--blue); }
+        .p-violet .step-item::before { background: var(--violet); }
+
+        .p-mint  .step-item:hover { border-color: rgba(0,245,196,0.3); color: var(--mint); box-shadow: 0 0 20px rgba(0,245,196,0.08); }
+        .p-blue  .step-item:hover { border-color: rgba(10,132,255,0.3); color: #5ac8fa; box-shadow: 0 0 20px rgba(10,132,255,0.08); }
+        .p-violet .step-item:hover { border-color: rgba(191,90,242,0.3); color: var(--violet); box-shadow: 0 0 20px rgba(191,90,242,0.08); }
+        .p-violet .step-item.navy-step:hover { border-color: rgba(30,55,153,0.5); color: #748fd8; }
+
+        .step-left { display: flex; align-items: center; gap: 2px; position: relative; z-index: 1; }
 
         .step-num {
-            font-size: 0.68rem; font-weight: 700; padding: 3px 7px;
-            border-radius: 6px; margin-right: 10px;
             font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem; font-weight: 700;
+            padding: 3px 7px; border-radius: 5px; margin-right: 10px;
+            letter-spacing: 1px;
         }
+        .p-mint  .step-num { background: rgba(0,245,196,0.12); color: var(--mint); border: 1px solid rgba(0,245,196,0.2); }
+        .p-blue  .step-num { background: rgba(10,132,255,0.12); color: #5ac8fa; border: 1px solid rgba(10,132,255,0.2); }
+        .p-violet .step-num { background: rgba(191,90,242,0.12); color: #d08ef7; border: 1px solid rgba(191,90,242,0.2); }
+        .p-violet .step-item.navy-step .step-num { background: rgba(30,55,153,0.2); color: #748fd8; border-color: rgba(30,55,153,0.3); }
+
+        .done-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.58rem; font-weight: 700;
+            padding: 2px 7px; border-radius: 4px;
+            margin-left: 8px; display: none;
+            background: rgba(0,245,196,0.12);
+            color: var(--mint); border: 1px solid rgba(0,245,196,0.2);
+        }
+        .step-item.is-done .done-badge { display: inline-block; }
 
         .step-arrow {
-            font-size: 0.85rem; color: var(--text-sub);
-            transition: transform 0.2s ease;
+            font-size: 0.7rem; opacity: 0.3;
+            transition: transform 0.2s ease, opacity 0.2s;
+            position: relative; z-index: 1;
         }
+        .step-item:hover .step-arrow { transform: translateX(5px); opacity: 0.8; }
+        .step-item.is-done .step-arrow { opacity: 0.6; }
 
-        /* 완료 뱃지 */
-        .step-done-badge {
-            font-size: 0.7rem; font-weight: 700; padding: 2px 7px;
-            border-radius: 5px; margin-left: 8px;
-            background: var(--theme-mint-light); color: #047857;
-            display: none;
-        }
-        .step-item.is-done .step-done-badge { display: inline-block; }
-        .step-item.is-done .step-arrow { color: var(--theme-mint); }
-
-        /* Mint steps */
-        .pillar.theme-mint .step-num { background: var(--theme-mint-light); color: #047857; }
-        .pillar.theme-mint .step-item:hover { border-color: var(--theme-mint); color: var(--theme-mint); box-shadow: 0 5px 18px rgba(16,185,129,0.12); }
-        .pillar.theme-mint .step-item:hover .step-arrow { transform: translateX(4px); color: var(--theme-mint); }
-
-        /* Blue steps */
-        .pillar.theme-blue .step-num { background: var(--theme-blue-light); color: #005bb5; }
-        .pillar.theme-blue .step-item:hover { border-color: var(--theme-blue); color: var(--theme-blue); box-shadow: 0 5px 18px rgba(0,113,227,0.12); }
-        .pillar.theme-blue .step-item:hover .step-arrow { transform: translateX(4px); color: var(--theme-blue); }
-
-        /* Violet steps */
-        .pillar.theme-violet .step-num { background: var(--theme-multi-light); color: #4527a0; }
-        .pillar.theme-violet .step-item:hover { border-color: var(--theme-violet); color: var(--theme-violet); box-shadow: 0 5px 18px rgba(108,92,231,0.12); }
-        .pillar.theme-violet .step-item:hover .step-arrow { transform: translateX(4px); color: var(--theme-violet); }
-        .pillar.theme-violet .step-item.navy-step:hover { border-color: var(--theme-navy); color: var(--theme-navy); }
-        .pillar.theme-violet .step-item.navy-step .step-num { background: #e8eaf6; color: var(--theme-navy); }
-
-        /* ════════════════════════════════════════
-           저작권 플로팅 버튼
-        ════════════════════════════════════════ */
-        .copyright-btn {
-            position: fixed; bottom: 30px; right: 30px;
-            width: 46px; height: 46px; border-radius: 50%;
-            background: white; border: 1px solid #e5e5e7;
+        /* ── COPYRIGHT FLOAT ── */
+        .copy-btn {
+            position: fixed; bottom: 28px; right: 28px;
+            width: 44px; height: 44px; border-radius: 50%;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--glass-border);
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 8px 22px rgba(0,0,0,0.07);
-            cursor: pointer; font-size: 1.15rem; font-weight: 900;
-            color: var(--text-sub);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            z-index: 4000; text-decoration: none;
+            color: rgba(255,255,255,0.3); font-size: 1rem; font-weight: 900;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+            z-index: 500; backdrop-filter: blur(12px);
         }
-        .copyright-btn:hover {
-            color: var(--theme-blue); border-color: var(--theme-blue);
-            transform: scale(1.12) rotate(10deg);
-            box-shadow: 0 14px 28px rgba(0,113,227,0.15);
+        .copy-btn:hover {
+            color: var(--mint);
+            border-color: rgba(0,245,196,0.4);
+            box-shadow: 0 0 30px rgba(0,245,196,0.2);
+            transform: scale(1.12) rotate(12deg);
         }
 
-        /* ════════════════════════════════════════
-           모달 — ✅ FIX: visibility 방식으로 교체
-        ════════════════════════════════════════ */
+        /* ════════════════════════════════
+           MODAL
+        ════════════════════════════════ */
         .modal-overlay {
-            position: fixed; top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.38);
-            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
             display: flex; align-items: center; justify-content: center;
             z-index: 9999;
-            /* ✅ FIX: display 토글 대신 visibility + opacity */
-            visibility: hidden; pointer-events: none; opacity: 0;
+            visibility: hidden; opacity: 0; pointer-events: none;
             transition: opacity 0.28s ease, visibility 0.28s ease;
         }
-        .modal-overlay.show {
-            visibility: visible; pointer-events: auto; opacity: 1;
-        }
+        .modal-overlay.show { visibility: visible; opacity: 1; pointer-events: auto; }
 
         .modal-box {
-            background: white; border-radius: 24px; padding: 40px;
-            width: 100%; max-width: 430px;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.18);
+            background: #0d1525;
+            border: 1px solid rgba(0,245,196,0.2);
+            border-radius: 20px; padding: 40px;
+            width: 100%; max-width: 440px;
+            box-shadow: 0 0 80px rgba(0,245,196,0.08), 0 40px 80px rgba(0,0,0,0.6);
             text-align: center;
-            transform: scale(0.88) translateY(12px);
-            transition: transform 0.32s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid rgba(0,0,0,0.05);
+            transform: scale(0.88) translateY(16px);
+            transition: transform 0.32s cubic-bezier(0.175,0.885,0.32,1.275);
         }
         .modal-overlay.show .modal-box { transform: scale(1) translateY(0); }
 
-        .modal-icon  { font-size: 3rem; margin-bottom: 14px; }
-        .modal-title { font-size: 1.45rem; font-weight: 900; margin: 0 0 14px; letter-spacing: -0.03em; }
-        /* ✅ FIX: 인라인 스타일 대신 클래스로 색상 제어 */
-        .modal-title.type-danger { color: #ff3b30; }
-        .modal-title.type-success { color: var(--theme-mint); }
-        .modal-title.type-info   { color: var(--theme-blue); }
+        .modal-icon { font-size: 2.8rem; margin-bottom: 14px; }
+        .modal-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2rem; font-weight: 700;
+            letter-spacing: 0.03em;
+            margin-bottom: 14px;
+        }
+        .modal-title.type-danger  { color: var(--red); }
+        .modal-title.type-success { color: var(--mint); }
+        .modal-title.type-info    { color: var(--blue); }
 
         .modal-desc {
-            font-size: 0.97rem; font-weight: 500; color: var(--text-sub);
-            line-height: 1.65; margin-bottom: 28px; word-break: keep-all;
+            font-size: 0.9rem; line-height: 1.7;
+            color: rgba(240,244,255,0.55);
+            margin-bottom: 28px;
         }
 
-        .modal-btn-group { display: flex; gap: 10px; justify-content: center; }
-        .modal-btn {
-            flex: 1; padding: 14px; border-radius: 14px;
-            font-size: 1rem; font-weight: 800;
+        .modal-btns { display: flex; gap: 10px; }
+        .mbtn {
+            flex: 1; padding: 13px;
+            border-radius: 10px; border: none;
             font-family: 'Noto Sans KR', sans-serif;
-            border: none; cursor: pointer; transition: all 0.18s ease;
+            font-size: 0.92rem; font-weight: 700;
+            cursor: pointer; transition: all 0.18s ease;
         }
-        .modal-btn.cancel  { background: #f5f5f7; color: var(--text-main); }
-        .modal-btn.cancel:hover  { background: #e5e5e7; }
-        .modal-btn.danger  { background: #ff3b30; color: white; box-shadow: 0 4px 16px rgba(255,59,48,0.28); }
-        .modal-btn.danger:hover  { background: #d70015; transform: translateY(-2px); }
-        .modal-btn.primary { background: var(--theme-blue); color: white; box-shadow: 0 4px 16px rgba(0,113,227,0.28); }
-        .modal-btn.primary:hover { background: #005bb5; transform: translateY(-2px); }
+        .mbtn.cancel  { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.1); }
+        .mbtn.cancel:hover  { background: rgba(255,255,255,0.12); }
+        .mbtn.danger  { background: rgba(255,69,58,0.2); color: var(--red); border: 1px solid rgba(255,69,58,0.35); }
+        .mbtn.danger:hover  { background: rgba(255,69,58,0.3); transform: translateY(-2px); box-shadow: 0 0 20px rgba(255,69,58,0.2); }
+        .mbtn.primary { background: rgba(0,245,196,0.15); color: var(--mint); border: 1px solid rgba(0,245,196,0.3); }
+        .mbtn.primary:hover { background: rgba(0,245,196,0.25); transform: translateY(-2px); box-shadow: 0 0 20px rgba(0,245,196,0.15); }
 
-        /* ════════════════════════════════════════
-           키프레임 & 모션 미디어쿼리 (✅ FIX 추가)
-        ════════════════════════════════════════ */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(28px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50%       { opacity: 0; }
-        }
-
-        /* ✅ FIX: 저사양/모션 민감 사용자 배려 */
-        @media (prefers-reduced-motion: reduce) {
-            .pillar, .hero-section { animation: none; opacity: 1; transform: none; }
-            .typed-cursor { animation: none; }
-        }
-
-        /* ════════════════════════════════════════
-           반응형
-        ════════════════════════════════════════ */
-        @media (max-width: 1024px) { .pillar-container { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 768px) {
-            .pillar-container { grid-template-columns: 1fr; }
-            .hero-title { font-size: 2.2rem; }
+        /* ════════════════════════════════
+           RESPONSIVE
+        ════════════════════════════════ */
+        @media (max-width: 1024px) { .pillars { grid-template-columns: repeat(2,1fr); } }
+        @media (max-width: 680px)  {
+            .pillars { grid-template-columns: 1fr; }
+            .hero-title { font-size: 1.8rem; }
             header { padding: 0 20px; }
-            .hero-section { margin-bottom: 40px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .pillar, .hero { animation: none; opacity: 1; }
+            .typed-cursor { animation: none; }
         }
     </style>
 </head>
 <body>
 
-<!-- 이진수 ambient 배경 캔버스 -->
-<canvas id="binaryCanvas"></canvas>
+<!-- ═══ BG CANVASES ═══ -->
+<canvas id="starCanvas"></canvas>
+<canvas id="gridCanvas"></canvas>
+<canvas id="particleCanvas"></canvas>
+<div class="scanline"></div>
 
-<!-- ════════ 헤더 ════════ -->
+<div id="app">
+<!-- ═══ HEADER ═══ -->
 <header>
     <div class="header-main">
         <div class="header-left">
-            <span class="target-badge">대상: 중학교 1~3학년</span>
-            <h1 class="main-title">데이터 비트박스</h1>
+            <span class="badge-target">▸ 중학교 1–3학년</span>
+            <h1 class="site-title">DATA <span>BITBOX</span></h1>
         </div>
-        <div class="status-controller">
-            <button class="status-btn" onclick="openResetModal()">🔄 전체 데이터 초기화</button>
-        </div>
+        <button class="reset-btn" onclick="openResetModal()">⟳ 전체 초기화</button>
     </div>
-
-    <!-- 전체 학습 진행률 바 -->
-    <div class="progress-bar-wrap">
-        <span class="progress-label">PROGRESS</span>
-        <div class="progress-segments" id="progressSegments"></div>
-        <span class="progress-count" id="progressCount">0 / 7</span>
+    <div class="progress-strip">
+        <span class="prog-label">PROGRESS</span>
+        <div class="prog-segs" id="progSegs"></div>
+        <span class="prog-count" id="progCount">0 / 7</span>
     </div>
 </header>
 
-<!-- ════════ 메인 ════════ -->
+<!-- ═══ MAIN ═══ -->
 <main>
-    <div class="hero-section">
-        <div class="hero-eyebrow">✦ Digital Literacy Course</div>
+    <div class="hero">
+        <div class="hero-chip">✦ Digital Literacy Course</div>
         <h2 class="hero-title">
-            컴퓨터는 세상을<br>
-            <span class="typed-text" id="typedText"></span><span class="typed-cursor"></span>
+            <span class="line1">컴퓨터는 세상을</span>
+            <span class="line2"><span id="typedText"></span><span class="typed-cursor"></span></span>
         </h2>
-        <p class="hero-subtitle">
-            올바른 디지털 시민으로 성장하기 위한 첫걸음,<br>
-            현실의 정보가 디지털 코드로 변환되는 과정을 탐구해 보세요.
-        </p>
+        <p class="hero-sub">올바른 디지털 시민으로 성장하기 위한 첫걸음,<br>현실의 정보가 디지털 코드로 변환되는 과정을 탐구하세요.</p>
     </div>
 
-    <div class="pillar-container">
+    <div class="pillars">
 
         <!-- PART 01 -->
-        <div class="pillar theme-mint">
+        <div class="pillar p-mint">
+            <div class="pillar-eyebrow">PART 01 · FOUNDATION</div>
             <div class="pillar-icon">🧱</div>
-            <div class="pillar-header">PART 01 · FOUNDATION</div>
-            <h3 class="pillar-title">데이터와 비트</h3>
-            <p class="pillar-desc">현실의 아날로그 정보가 0과 1로 이루어진 디지털 세상의 조각으로 나뉘는 원리를 배웁니다.</p>
-            <!-- ✅ FIX: onclick 인라인 제거, <a> 태그로 접근성 개선 -->
+            <div class="pillar-title">데이터와 비트</div>
+            <p class="pillar-desc">아날로그와 디지털 데이터를 탐구하고, 디지털 데이터의 가치와 비트의 원리를 배웁니다.</p>
             <ul class="step-list">
                 <li>
                     <a class="step-item" href="가치_개념.html" data-step="1">
-                        <div class="step-item-left">
+                        <div class="step-left">
                             <span class="step-num">STEP 1</span>
                             디지털 데이터의 가치
-                            <span class="step-done-badge">✓ 완료</span>
+                            <span class="done-badge">✓ DONE</span>
                         </div>
-                        <span class="step-arrow">→</span>
+                        <span class="step-arrow">▶</span>
                     </a>
                 </li>
                 <li>
                     <a class="step-item" href="비트_개념.html" data-step="2">
-                        <div class="step-item-left">
+                        <div class="step-left">
                             <span class="step-num">STEP 2</span>
                             비트(Bit)란?
-                            <span class="step-done-badge">✓ 완료</span>
+                            <span class="done-badge">✓ DONE</span>
                         </div>
-                        <span class="step-arrow">→</span>
+                        <span class="step-arrow">▶</span>
                     </a>
                 </li>
             </ul>
         </div>
 
         <!-- PART 02 -->
-        <div class="pillar theme-blue">
+        <div class="pillar p-blue">
+            <div class="pillar-eyebrow">PART 02 · NUMBER &amp; TEXT</div>
             <div class="pillar-icon">🔠</div>
-            <div class="pillar-header">PART 02 · NUMBER &amp; TEXT</div>
-            <h3 class="pillar-title">숫자와 문자의 표현</h3>
-            <p class="pillar-desc">우리가 사용하는 숫자와 글자가 컴퓨터의 언어로 어떻게 번역되어 저장되는지 확인합니다.</p>
+            <div class="pillar-title">숫자와 문자의 표현</div>
+            <p class="pillar-desc">숫자와 문자가 디지털 코드로 처리되는 원리를 탐구합니다.</p>
             <ul class="step-list">
                 <li>
                     <a class="step-item" href="숫자_개념.html" data-step="3">
-                        <div class="step-item-left">
+                        <div class="step-left">
                             <span class="step-num">STEP 3</span>
                             숫자의 디지털 표현
-                            <span class="step-done-badge">✓ 완료</span>
+                            <span class="done-badge">✓ DONE</span>
                         </div>
-                        <span class="step-arrow">→</span>
+                        <span class="step-arrow">▶</span>
                     </a>
                 </li>
                 <li>
                     <a class="step-item" href="문자_개념.html" data-step="4">
-                        <div class="step-item-left">
+                        <div class="step-left">
                             <span class="step-num">STEP 4</span>
                             문자의 디지털 표현
-                            <span class="step-done-badge">✓ 완료</span>
+                            <span class="done-badge">✓ DONE</span>
                         </div>
-                        <span class="step-arrow">→</span>
+                        <span class="step-arrow">▶</span>
                     </a>
                 </li>
             </ul>
         </div>
 
         <!-- PART 03 -->
-        <div class="pillar theme-violet">
+        <div class="pillar p-violet">
+            <div class="pillar-eyebrow">PART 03 · MULTIMEDIA</div>
             <div class="pillar-icon">🎨</div>
-            <div class="pillar-header">PART 03 · MULTIMEDIA</div>
-            <h3 class="pillar-title">멀티미디어의 표현</h3>
-            <p class="pillar-desc">빛의 삼원색과 소리의 파동, 시간의 흐름이 어떻게 디지털 코드가 되어 처리되는지 알아봅니다.</p>
+            <div class="pillar-title">멀티미디어의 표현</div>
+            <p class="pillar-desc">빛의 삼원색, 소리의 파동, 동영상의 흐름이 디지털 코드로 처리되는 원리를 탐구합니다.</p>
             <ul class="step-list">
                 <li>
                     <a class="step-item" href="이미지_개념.html" data-step="5">
-                        <div class="step-item-left">
+                        <div class="step-left">
                             <span class="step-num">STEP 5</span>
                             이미지의 표현
-                            <span class="step-done-badge">✓ 완료</span>
+                            <span class="done-badge">✓ DONE</span>
                         </div>
-                        <span class="step-arrow">→</span>
+                        <span class="step-arrow">▶</span>
                     </a>
                 </li>
                 <li>
                     <a class="step-item" href="소리_개념.html" data-step="6">
-                        <div class="step-item-left">
+                        <div class="step-left">
                             <span class="step-num">STEP 6</span>
                             소리의 표현
-                            <span class="step-done-badge">✓ 완료</span>
+                            <span class="done-badge">✓ DONE</span>
                         </div>
-                        <span class="step-arrow">→</span>
+                        <span class="step-arrow">▶</span>
                     </a>
                 </li>
                 <li>
                     <a class="step-item navy-step" href="동영상_개념.html" data-step="7">
-                        <div class="step-item-left">
+                        <div class="step-left">
                             <span class="step-num">STEP 7</span>
                             동영상의 표현
-                            <span class="step-done-badge">✓ 완료</span>
+                            <span class="done-badge">✓ DONE</span>
                         </div>
-                        <span class="step-arrow">→</span>
+                        <span class="step-arrow">▶</span>
                     </a>
                 </li>
             </ul>
@@ -546,213 +642,280 @@
 
     </div>
 </main>
+</div>
 
-<!-- 저작권 버튼 -->
-<!-- ✅ FIX: onclick return false 제거, addEventListener로 처리 -->
-<a href="#" class="copyright-btn" id="copyrightBtn" title="저작권 안내">ⓒ</a>
+<!-- ═══ COPYRIGHT ═══ -->
+<a href="#" class="copy-btn" id="copyBtn" title="저작권 안내">ⓒ</a>
 
-<!-- ════════ 모달 ════════ -->
-<!-- ✅ FIX: role="dialog" + aria 속성 추가 -->
-<div id="customModal" class="modal-overlay"
-     role="dialog" aria-modal="true"
-     aria-labelledby="modalTitle" aria-describedby="modalDesc">
+<!-- ═══ MODAL ═══ -->
+<div id="modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mTitle" aria-describedby="mDesc">
     <div class="modal-box">
-        <div class="modal-icon" id="modalIcon">⚠️</div>
-        <h3 class="modal-title" id="modalTitle">경고</h3>
-        <p class="modal-desc" id="modalDesc">메시지 내용</p>
-        <div class="modal-btn-group" id="modalButtons"></div>
+        <div class="modal-icon" id="mIcon"></div>
+        <h3 class="modal-title" id="mTitle"></h3>
+        <p class="modal-desc" id="mDesc"></p>
+        <div class="modal-btns" id="mBtns"></div>
     </div>
 </div>
 
-<!-- ════════ JavaScript ════════ -->
 <script>
-/* ──────────────────────────────────────────
-   1. 이진수 Ambient 배경 캔버스
-────────────────────────────────────────── */
-(function () {
-    const canvas = document.getElementById('binaryCanvas');
-    const ctx = canvas.getContext('2d');
-    const COLS = 40;
-    let drops = [];
+/* ══════════════════════════════════════════
+   1. STAR FIELD
+══════════════════════════════════════════ */
+(function(){
+    const c = document.getElementById('starCanvas');
+    const ctx = c.getContext('2d');
+    let stars = [];
 
-    function resize() {
-        canvas.width  = window.innerWidth;
-        canvas.height = window.innerHeight;
-        const cols = Math.floor(canvas.width / (canvas.width / COLS));
-        drops = Array.from({ length: cols }, () => Math.random() * -50);
+    function resize(){
+        c.width = innerWidth; c.height = innerHeight;
+        stars = Array.from({length:220}, ()=>({
+            x: Math.random()*innerWidth,
+            y: Math.random()*innerHeight,
+            r: Math.random()*1.4+0.2,
+            o: Math.random()*0.7+0.1,
+            sp: Math.random()*0.015+0.003,
+            phase: Math.random()*Math.PI*2
+        }));
     }
-
-    function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#1d6fc4';
-        ctx.font = '13px JetBrains Mono, monospace';
-        const colW = canvas.width / drops.length;
-        drops.forEach((y, i) => {
-            const bit = Math.random() > 0.5 ? '1' : '0';
-            ctx.fillText(bit, i * colW, y);
-            drops[i] = y > canvas.height + 20 ? -20 : y + 18;
+    let t=0;
+    function draw(){
+        ctx.clearRect(0,0,c.width,c.height);
+        stars.forEach(s=>{
+            ctx.globalAlpha = s.o*(0.5+0.5*Math.sin(t*s.sp+s.phase));
+            ctx.fillStyle='#fff';
+            ctx.beginPath();
+            ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+            ctx.fill();
         });
+        ctx.globalAlpha=1; t+=1;
+        requestAnimationFrame(draw);
     }
-
-    resize();
-    window.addEventListener('resize', resize);
-    setInterval(draw, 120);
+    resize(); addEventListener('resize',resize); draw();
 })();
 
-/* ──────────────────────────────────────────
-   2. Hero 타이핑 효과
-────────────────────────────────────────── */
-(function () {
-    const el   = document.getElementById('typedText');
-    const text = '어떻게 이해할까?';
-    let i = 0;
-    // 페이지 로드 후 0.9초 뒤 시작
-    setTimeout(function type() {
-        if (i <= text.length) {
-            el.textContent = text.slice(0, i++);
-            setTimeout(type, 90);
+/* ══════════════════════════════════════════
+   2. PERSPECTIVE GRID
+══════════════════════════════════════════ */
+(function(){
+    const c = document.getElementById('gridCanvas');
+    const ctx = c.getContext('2d');
+    let offset = 0;
+
+    function resize(){ c.width=innerWidth; c.height=innerHeight; }
+    function draw(){
+        ctx.clearRect(0,0,c.width,c.height);
+        const W=c.width, H=c.height, HH=H*0.62;
+        const LINES=18, VCOLS=22;
+
+        // horizontal lines (perspective)
+        for(let i=0;i<LINES;i++){
+            const t = (i/(LINES-1));
+            const y = HH + (H-HH)*(t*t) + (offset*t*t*60)%((H-HH)/LINES);
+            const alpha = t*0.55;
+            ctx.strokeStyle=`rgba(0,245,196,${alpha})`;
+            ctx.lineWidth=0.5;
+            ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
         }
-    }, 900);
+        // vertical lines converging to VP
+        const vp = {x:W/2, y:HH};
+        for(let i=0;i<=VCOLS;i++){
+            const bx = (i/VCOLS)*W;
+            const alpha = 0.15 + 0.2*(1-Math.abs(i/VCOLS-0.5)*2);
+            ctx.strokeStyle=`rgba(0,245,196,${alpha})`;
+            ctx.lineWidth=0.4;
+            ctx.beginPath(); ctx.moveTo(vp.x,vp.y); ctx.lineTo(bx,H); ctx.stroke();
+        }
+        // horizon glow
+        const gr = ctx.createLinearGradient(0,HH-40,0,HH+40);
+        gr.addColorStop(0,'rgba(0,245,196,0)');
+        gr.addColorStop(0.5,'rgba(0,245,196,0.25)');
+        gr.addColorStop(1,'rgba(0,245,196,0)');
+        ctx.fillStyle=gr; ctx.fillRect(0,HH-40,W,80);
+
+        offset+=0.3;
+        requestAnimationFrame(draw);
+    }
+    resize(); addEventListener('resize',resize); draw();
 })();
 
-/* ──────────────────────────────────────────
-   3. 진행률 바 & 완료 뱃지
-────────────────────────────────────────── */
-const TOTAL_STEPS = 7;
+/* ══════════════════════════════════════════
+   3. PARTICLE STREAM (floating bits)
+══════════════════════════════════════════ */
+(function(){
+    const c = document.getElementById('particleCanvas');
+    const ctx = c.getContext('2d');
+    let pts = [];
+    const COLORS=['#00f5c4','#0a84ff','#bf5af2','#ffd60a'];
 
-function getCompletedSteps() {
-    const raw = localStorage.getItem('completedSteps');
-    return raw ? JSON.parse(raw) : [];
-}
+    function resize(){
+        c.width=innerWidth; c.height=innerHeight;
+        pts = Array.from({length:55},()=>mkPt());
+    }
+    function mkPt(){
+        return {
+            x: Math.random()*innerWidth,
+            y: Math.random()*innerHeight,
+            vy: -(Math.random()*0.6+0.15),
+            vx: (Math.random()-0.5)*0.3,
+            life:0, maxLife: 180+Math.random()*200,
+            char: Math.random()>0.5?'1':'0',
+            size: Math.random()*8+7,
+            col: COLORS[Math.floor(Math.random()*COLORS.length)]
+        };
+    }
+    function draw(){
+        ctx.clearRect(0,0,c.width,c.height);
+        ctx.font='700 12px "JetBrains Mono", monospace';
+        pts.forEach((p,i)=>{
+            p.x+=p.vx; p.y+=p.vy; p.life++;
+            if(p.life>p.maxLife||p.y<-30) pts[i]=mkPt();
+            const alpha = Math.min(p.life/30,1)*Math.min((p.maxLife-p.life)/30,1)*0.45;
+            ctx.globalAlpha=alpha;
+            ctx.fillStyle=p.col;
+            ctx.font=`700 ${p.size}px "JetBrains Mono",monospace`;
+            ctx.fillText(p.char,p.x,p.y);
+        });
+        ctx.globalAlpha=1;
+        requestAnimationFrame(draw);
+    }
+    resize(); addEventListener('resize',resize); draw();
+})();
 
-function renderProgress() {
-    const done  = getCompletedSteps();
-    const segs  = document.getElementById('progressSegments');
-    const count = document.getElementById('progressCount');
+/* ══════════════════════════════════════════
+   4. HERO TYPING
+══════════════════════════════════════════ */
+(function(){
+    const el = document.getElementById('typedText');
+    const txt = '어떻게 이해할까?';
+    let i=0;
+    setTimeout(function type(){
+        if(i<=txt.length){ el.textContent=txt.slice(0,i++); setTimeout(type,95); }
+    },1000);
+})();
 
-    segs.innerHTML = '';
-    for (let i = 1; i <= TOTAL_STEPS; i++) {
-        const seg = document.createElement('div');
-        seg.className = 'progress-seg' + (done.includes(i) ? ' done' : '');
+/* ══════════════════════════════════════════
+   5. 3D TILT on cards
+══════════════════════════════════════════ */
+document.querySelectorAll('.pillar').forEach(card=>{
+    card.addEventListener('mousemove',e=>{
+        const r=card.getBoundingClientRect();
+        const cx=r.left+r.width/2, cy=r.top+r.height/2;
+        const dx=(e.clientX-cx)/r.width, dy=(e.clientY-cy)/r.height;
+        card.style.transform=`translateY(-8px) rotateY(${dx*10}deg) rotateX(${-dy*8}deg)`;
+    });
+    card.addEventListener('mouseleave',()=>{
+        card.style.transform='';
+        card.style.transition='transform 0.6s cubic-bezier(0.16,1,0.3,1), border-color 0.4s, box-shadow 0.4s';
+    });
+    card.addEventListener('mouseenter',()=>{
+        card.style.transition='transform 0.08s ease, border-color 0.4s, box-shadow 0.4s';
+    });
+});
+
+/* ══════════════════════════════════════════
+   6. PROGRESS
+══════════════════════════════════════════ */
+const TOTAL=7;
+const STEP_COLORS={
+    1:'#00f5c4',2:'#00f5c4',
+    3:'#0a84ff',4:'#0a84ff',
+    5:'#bf5af2',6:'#bf5af2',7:'#4361ee'
+};
+
+function getCompleted(){ try{ return JSON.parse(localStorage.getItem('completedSteps')||'[]'); }catch{ return []; } }
+
+function renderProgress(){
+    const done=getCompleted();
+    const segs=document.getElementById('progSegs');
+    const cnt=document.getElementById('progCount');
+    segs.innerHTML='';
+    for(let i=1;i<=TOTAL;i++){
+        const seg=document.createElement('div');
+        seg.className='prog-seg'+(done.includes(i)?' done':'');
+        const col=STEP_COLORS[i];
+        if(done.includes(i)){
+            seg.style.background=col;
+            seg.style.boxShadow=`0 0 10px ${col}`;
+            seg.style.color=col;
+        }
         segs.appendChild(seg);
     }
-    count.textContent = `${done.length} / ${TOTAL_STEPS}`;
+    cnt.textContent=`${done.length} / ${TOTAL}`;
+    cnt.style.color=done.length>0?STEP_COLORS[Math.max(...done)]:'rgba(255,255,255,0.3)';
 
-    // 완료 뱃지
-    document.querySelectorAll('.step-item').forEach(item => {
-        const step = parseInt(item.dataset.step);
-        item.classList.toggle('is-done', done.includes(step));
+    document.querySelectorAll('.step-item').forEach(el=>{
+        const s=parseInt(el.dataset.step);
+        el.classList.toggle('is-done',done.includes(s));
     });
 }
-
 renderProgress();
 
-/* ──────────────────────────────────────────
-   4. 모달 시스템 (✅ 전면 수정)
-   - visibility 방식 (display 토글 제거)
-   - 인라인 style.color 제거 → 클래스 제어
-   - 오버레이 클릭으로 닫기 (위험 모달 제외)
-────────────────────────────────────────── */
-const modal  = document.getElementById('customModal');
-const mIcon  = document.getElementById('modalIcon');
-const mTitle = document.getElementById('modalTitle');
-const mDesc  = document.getElementById('modalDesc');
-const mBtns  = document.getElementById('modalButtons');
+/* ══════════════════════════════════════════
+   7. MODAL
+══════════════════════════════════════════ */
+const modal=document.getElementById('modal');
+const mIcon=document.getElementById('mIcon');
+const mTitle=document.getElementById('mTitle');
+const mDesc=document.getElementById('mDesc');
+const mBtns=document.getElementById('mBtns');
 
-function openModal({ icon, title, titleType, descHTML, buttonsHTML, preventOverlayClose = false }) {
-    // ✅ FIX: 이전 상태 완전 초기화
-    mTitle.className = 'modal-title' + (titleType ? ` type-${titleType}` : '');
-    mIcon.textContent  = icon;
-    mTitle.textContent = title;
-    mDesc.innerHTML    = descHTML;
-    mBtns.innerHTML    = buttonsHTML;
-    modal.dataset.preventClose = preventOverlayClose ? 'true' : '';
+function openModal({icon,title,titleType,descHTML,buttonsHTML,noOverlayClose=false}){
+    mTitle.className='modal-title'+(titleType?` type-${titleType}`:'');
+    mIcon.textContent=icon; mTitle.textContent=title;
+    mDesc.innerHTML=descHTML; mBtns.innerHTML=buttonsHTML;
+    modal.dataset.noc=noOverlayClose?'1':'';
     modal.classList.add('show');
-    // 첫 번째 버튼에 포커스
-    const firstBtn = mBtns.querySelector('button');
-    if (firstBtn) setTimeout(() => firstBtn.focus(), 50);
+    const fb=mBtns.querySelector('button');
+    if(fb) setTimeout(()=>fb.focus(),50);
 }
+function closeModal(){ modal.classList.remove('show'); }
 
-function closeModal() {
-    modal.classList.remove('show');
-}
-
-// ✅ FIX: 오버레이 배경 클릭으로 닫기
-modal.addEventListener('click', (e) => {
-    if (e.target === modal && !modal.dataset.preventClose) closeModal();
+modal.addEventListener('click',e=>{
+    if(e.target===modal&&!modal.dataset.noc) closeModal();
+});
+document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'&&modal.classList.contains('show')) closeModal();
 });
 
-// ESC 키로도 닫기
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.classList.contains('show')) closeModal();
-});
-
-/* ── 초기화 확인 모달 ── */
-function openResetModal() {
+function openResetModal(){
     openModal({
-        icon: '⚠️',
-        title: '전체 데이터 초기화',
-        titleType: 'danger',
-        // ✅ FIX: 중복 </b> 태그 제거
-        descHTML: `이 기기에 저장된 <b>'퀴즈 점수', '학습 메모', '소감문'</b> 등<br>모든 기록이 영구적으로 삭제됩니다.<br><br>데이터를 초기화하시겠습니까?`,
-        buttonsHTML: `
-            <button class="modal-btn cancel" onclick="closeModal()">취소</button>
-            <button class="modal-btn danger" onclick="executeReset()">초기화 진행</button>
-        `,
-        preventOverlayClose: true  // 실수 방지: 배경 클릭 차단
+        icon:'⚠',title:'전체 데이터 초기화',titleType:'danger',
+        descHTML:`저장된 <b>퀴즈 점수, 학습 메모, 소감문</b> 등<br>모든 기록이 영구적으로 삭제됩니다.<br><br>초기화하시겠습니까?`,
+        buttonsHTML:`<button class="mbtn cancel" onclick="closeModal()">취소</button><button class="mbtn danger" onclick="executeReset()">초기화 진행</button>`,
+        noOverlayClose:true
     });
 }
 
-/* ── 실제 초기화 실행 ── */
-function executeReset() {
-    localStorage.clear();
-    // ✅ FIX: location.reload() 대신 UI만 갱신
-    renderProgress();
-
+function executeReset(){
+    localStorage.clear(); renderProgress();
     openModal({
-        icon: '✅',
-        title: '초기화 완료',
-        titleType: 'success',
-        descHTML: '모든 학습 데이터가 초기화되었습니다.',
-        buttonsHTML: `<button class="modal-btn primary" onclick="closeModal()">확인</button>`,
-        preventOverlayClose: false
+        icon:'✓',title:'초기화 완료',titleType:'success',
+        descHTML:'모든 학습 데이터가 초기화되었습니다.',
+        buttonsHTML:`<button class="mbtn primary" onclick="closeModal()">확인</button>`
     });
 }
 
-/* ── 저작권 안내 모달 ── */
-function openInfoModal() {
+function openInfoModal(){
     openModal({
-        icon: 'ⓒ',
-        title: '저작권 및 출처 안내',
-        titleType: 'info',
-        descHTML: `
-            <div style="text-align:left;font-size:0.88rem;line-height:1.65;color:#424245;">
-                <p style="margin-top:0;">본 <b>'데이터 비트박스'</b>는 교육 목적으로 제작되었으며,
-                외부 유료 이미지를 전혀 사용하지 않은 프로그램입니다.</p>
-                <div style="background:#f5f5f7;padding:14px;border-radius:12px;margin-bottom:12px;">
-                    <strong style="color:var(--theme-blue);font-size:0.95rem;">1. 자체 제작 콘텐츠 (100% Coding Art)</strong><br>
-                    모든 인터랙티브 시각 자료는 CSS와 JavaScript Canvas API를 활용해
-                    <b>코드로 드로잉한 순수 창작물</b>입니다.
-                    일부는 Google(Gemini) &amp; OpenAI(ChatGPT) 생성형 시각자료입니다.
-                </div>
-                <div style="background:#f5f5f7;padding:14px;border-radius:12px;">
-                    <strong style="color:var(--theme-violet);font-size:0.95rem;">2. 오픈소스 라이선스 (Open Source)</strong><br>
-                    • <b>UI 아이콘:</b> Google Material Icons (Apache License 2.0)<br>
-                    • <b>로고 아이콘:</b> Feather Icons (MIT License)<br>
-                    • <b>웹 폰트:</b> Noto Sans KR, JetBrains Mono (OFL)
-                </div>
+        icon:'ⓒ',title:'저작권 및 출처',titleType:'info',
+        descHTML:`
+        <div style="text-align:left;font-size:0.85rem;line-height:1.7;color:rgba(240,244,255,0.6);">
+            <p style="margin-top:0;">본 <b style="color:var(--mint)">'데이터 비트박스'</b>는 교육 목적으로 제작된 프로그램입니다.</p>
+            <div style="background:rgba(255,255,255,0.04);padding:14px;border-radius:10px;margin-bottom:10px;border:1px solid rgba(0,245,196,0.1);">
+                <strong style="color:var(--mint)">1. 자체 제작 (100% Coding Art)</strong><br>
+                모든 인터랙티브 시각 자료는 CSS·JS Canvas API로 코드 드로잉한 순수 창작물입니다.
+                일부는 Google(Gemini) &amp; Claude 생성형 시각자료입니다.
             </div>
-        `,
-        buttonsHTML: `<button class="modal-btn primary" onclick="closeModal()">확인했습니다</button>`,
-        preventOverlayClose: false
+            <div style="background:rgba(255,255,255,0.04);padding:14px;border-radius:10px;border:1px solid rgba(191,90,242,0.1);">
+                <strong style="color:var(--violet)">2. 오픈소스 (Open Source)</strong><br>
+                • UI 아이콘: Google Material Icons (Apache 2.0)<br>
+                • 웹 폰트: Noto Sans KR, Orbitron, JetBrains Mono (OFL)
+            </div>
+        </div>`,
+        buttonsHTML:`<button class="mbtn primary" onclick="closeModal()">확인했습니다</button>`
     });
 }
-
-/* ── 저작권 버튼 이벤트 (✅ inline onclick 제거) ── */
-document.getElementById('copyrightBtn').addEventListener('click', (e) => {
-    e.preventDefault();
-    openInfoModal();
-});
+document.getElementById('copyBtn').addEventListener('click',e=>{ e.preventDefault(); openInfoModal(); });
 </script>
 </body>
 </html>
