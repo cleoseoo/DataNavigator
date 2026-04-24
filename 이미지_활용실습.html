@@ -180,9 +180,138 @@
             background: #009432; color: #fff; padding: 12px 30px; border-radius: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             font-weight: 800; font-size: 1.1rem; opacity: 0; transition: 0.3s; z-index: 2000; text-align: center;
         }
-    </style>
+    
+        /* ══ 선택 화면 ══ */
+        #screen-select {
+            display:none; position:fixed; inset:0; z-index:89000;
+            align-items:center; justify-content:center;
+            background:linear-gradient(135deg,#0a1628 0%,#1a2a4a 50%,#0d2137 100%);
+        }
+        #screen-select::before {
+            content:''; position:absolute; inset:0; pointer-events:none;
+            background:radial-gradient(ellipse at 30% 50%,rgba(0,245,196,0.08) 0%,transparent 60%),
+                        radial-gradient(ellipse at 70% 50%,rgba(10,132,255,0.08) 0%,transparent 60%);
+        }
+        .sel-wrap { position:relative; z-index:1; text-align:center; padding:40px 20px; }
+        .sel-title { font-size:2.2rem; font-weight:900; color:white; margin-bottom:10px; letter-spacing:-0.02em; }
+        .sel-sub { font-size:1rem; color:rgba(255,255,255,0.45); margin-bottom:52px; font-weight:600; }
+        .sel-cards { display:flex; gap:24px; align-items:stretch; justify-content:center; }
+        .sel-card {
+            width:300px; padding:44px 30px; border-radius:28px;
+            cursor:pointer !important; display:flex; flex-direction:column;
+            align-items:center; gap:14px;
+            transition:transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s;
+        }
+        .sel-bitmap { background:linear-gradient(145deg,#0d2137,#1a3a5c); border:1.5px solid rgba(10,132,255,0.3); }
+        .sel-bitmap:hover { transform:translateY(-14px) scale(1.03); box-shadow:0 30px 60px rgba(10,132,255,0.3); border-color:rgba(10,132,255,0.7); }
+        .sel-vector { background:linear-gradient(145deg,#0d1f0d,#1a3520); border:1.5px solid rgba(0,245,196,0.3); }
+        .sel-vector:hover { transform:translateY(-14px) scale(1.03); box-shadow:0 30px 60px rgba(0,245,196,0.2); border-color:rgba(0,245,196,0.7); }
+        .sel-icon { font-size:3.8rem; line-height:1; }
+        .sel-chip { font-size:0.6rem; font-weight:900; letter-spacing:4px; padding:3px 14px; border-radius:20px; text-transform:uppercase; }
+        .sel-bitmap .sel-chip { background:rgba(10,132,255,0.2); color:#5ac8fa; border:1px solid rgba(10,132,255,0.3); }
+        .sel-vector .sel-chip { background:rgba(0,245,196,0.15); color:#00f5c4; border:1px solid rgba(0,245,196,0.3); }
+        .sel-name { font-size:1.5rem; font-weight:900; color:white; }
+        .sel-desc { font-size:0.85rem; color:rgba(255,255,255,0.55); line-height:1.75; text-align:center; font-weight:600; }
+        .sel-badge { font-size:0.78rem; font-weight:800; padding:7px 20px; border-radius:20px; margin-top:4px; }
+        .sel-bitmap .sel-badge { background:rgba(10,132,255,0.15); color:#5ac8fa; }
+        .sel-vector .sel-badge { background:rgba(0,245,196,0.1); color:#00f5c4; }
+        .sel-go { font-size:0.88rem; font-weight:900; padding:11px 30px; border-radius:20px; margin-top:6px; transition:all 0.2s; }
+        .sel-bitmap .sel-go { background:rgba(10,132,255,0.2); color:#5ac8fa; }
+        .sel-vector .sel-go { background:rgba(0,245,196,0.12); color:#00f5c4; }
+        .sel-bitmap:hover .sel-go { background:#0a84ff; color:white; }
+        .sel-vector:hover .sel-go { background:#00f5c4; color:#0a1628; }
+        .sel-vs { display:flex; align-items:center; justify-content:center; width:60px; flex-shrink:0; font-size:1rem; font-weight:900; color:rgba(255,255,255,0.2); }
+
+        /* ══ 벡터 게임 ══ */
+        #game-vector {
+            display:none; position:fixed; inset:0; z-index:88000;
+            flex-direction:column;
+            background:linear-gradient(135deg,#f8fffe 0%,#e8f5f0 100%);
+        }
+        .vg-topbar {
+            position:fixed; top:0; left:0; right:0; z-index:99999;
+            display:flex; align-items:center; gap:9px; padding:9px 22px;
+            background:rgba(255,255,255,0.92); backdrop-filter:blur(20px);
+            border-bottom:1px solid rgba(45,52,54,0.15);
+            box-shadow:0 2px 20px rgba(0,0,0,0.18); box-sizing:border-box;
+        }
+        .vg-back { display:inline-flex; align-items:center; gap:5px; font-size:0.72rem; font-weight:700; padding:6px 14px; border-radius:20px; border:1.5px solid rgba(45,52,54,0.25); color:#2d3436; background:rgba(45,52,54,0.06); cursor:pointer !important; transition:all 0.18s; }
+        .vg-back:hover { background:rgba(45,52,54,0.12); }
+        .vg-topbar-ttl { font-size:0.78rem; font-weight:700; color:#2d3436; opacity:0.9; }
+        .vg-body { display:flex; margin-top:46px; height:calc(100vh - 46px); overflow:hidden; }
+        .vg-left { width:370px; flex-shrink:0; background:rgba(255,255,255,0.97); border-right:1px solid rgba(0,0,0,0.08); padding:18px; overflow-y:auto; display:flex; flex-direction:column; gap:11px; }
+        .vg-right { flex:1; display:flex; flex-direction:column; gap:14px; padding:18px 22px; overflow-y:auto; }
+        .vg-ttl { font-size:1.05rem; font-weight:900; color:#2d6a4f; }
+        .vg-dsc { font-size:0.83rem; color:#636e72; font-weight:600; line-height:1.55; }
+        .vg-pg-row { display:flex; align-items:center; gap:8px; }
+        .vg-pg-lbl { font-size:0.72rem; font-weight:900; color:#2d6a4f; white-space:nowrap; }
+        .vg-pg-bar { flex:1; height:7px; background:#e0e0e0; border-radius:4px; overflow:hidden; }
+        .vg-pg-fill { height:100%; background:linear-gradient(90deg,#00b894,#00f5c4); border-radius:4px; transition:width 0.5s; width:0%; }
+        .vg-pg-txt { font-size:0.72rem; font-weight:900; color:#2d6a4f; white-space:nowrap; }
+        .vg-sc-row { display:flex; gap:10px; }
+        .vg-sc-box { flex:1; background:#f0fff8; border:1.5px solid rgba(0,184,148,0.2); border-radius:12px; padding:10px; text-align:center; }
+        .vg-sc-num { font-size:1.4rem; font-weight:900; color:#00b894; }
+        .vg-sc-lbl { font-size:0.68rem; color:#636e72; font-weight:700; }
+        .vg-card { background:white; border-radius:14px; padding:16px; border:2px solid rgba(0,184,148,0.2); box-shadow:0 4px 14px rgba(0,184,148,0.07); display:flex; flex-direction:column; gap:11px; }
+        .vg-mlbl { font-size:0.72rem; font-weight:900; color:#00b894; letter-spacing:1px; }
+        .vg-code { background:#1e2d2f; color:#a8ff78; border-radius:10px; padding:13px; font-family:'JetBrains Mono',monospace; font-size:0.8rem; line-height:1.9; overflow-x:auto; }
+        .vg-blank { display:inline-block; min-width:46px; background:rgba(255,255,255,0.1); border:1.5px dashed rgba(168,255,120,0.5); border-radius:5px; color:#ffd700; font-weight:900; padding:1px 6px; text-align:center; }
+        .vg-ins { display:flex; gap:8px; flex-wrap:wrap; }
+        .vg-in { flex:1; min-width:75px; padding:8px 10px; border:2px solid rgba(0,184,148,0.3); border-radius:8px; font-size:0.9rem; font-weight:800; text-align:center; outline:none; transition:0.2s; cursor:text !important; }
+        .vg-in:focus { border-color:#00b894; box-shadow:0 0 8px rgba(0,184,148,0.2); }
+        .vg-in.ok { background:#e8f5e9; border-color:#00b894; color:#00b894; }
+        .vg-in.ng { background:#ffeaea; border-color:#d63031; animation:vgsh 0.3s; }
+        @keyframes vgsh { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+        .vg-sub { background:linear-gradient(135deg,#00b894,#00cec9); color:white; border:none; border-radius:10px; padding:10px 18px; font-size:0.92rem; font-weight:900; cursor:pointer !important; transition:0.2s; box-shadow:0 4px 12px rgba(0,184,148,0.3); }
+        .vg-sub:hover { transform:translateY(-2px); }
+        .vg-hr { display:flex; align-items:center; gap:8px; }
+        .vg-hbtn { background:#fff8e1; border:1px solid #ffd700; color:#b8860b; padding:5px 10px; border-radius:8px; font-size:0.75rem; font-weight:800; cursor:pointer !important; }
+        .vg-htxt { font-size:0.78rem; color:#b8860b; font-weight:700; }
+        .vg-res { display:none; background:linear-gradient(135deg,#f0fff8,#e8f5e9); border:2px solid rgba(0,184,148,0.3); border-radius:16px; padding:28px 20px; text-align:center; flex-direction:column; gap:10px; align-items:center; }
+        .vg-ri { font-size:3rem; }
+        .vg-rt { font-size:1.25rem; font-weight:900; color:#2d6a4f; }
+        .vg-rs { font-size:1.8rem; font-weight:900; color:#00b894; }
+        .vg-rm { font-size:0.83rem; color:#636e72; font-weight:600; line-height:1.6; }
+        .vg-cvs-hd { font-size:0.95rem; font-weight:900; color:#2d6a4f; display:flex; align-items:center; gap:8px; }
+        .vg-cvs-tag { background:#2d6a4f; color:white; font-size:0.6rem; font-weight:800; padding:2px 8px; border-radius:10px; letter-spacing:1px; }
+        .vg-svg-box { flex:1; background:white; border-radius:16px; border:2px solid rgba(0,184,148,0.2); box-shadow:0 8px 25px rgba(0,184,148,0.07); overflow:hidden; padding:10px; }
+        .vg-svg-box svg { width:100%; height:auto; display:block; }
+        .vg-znote { text-align:center; font-size:0.72rem; color:#00b894; font-weight:700; padding:6px; }
+        .vg-cmp { display:flex; align-items:center; gap:14px; background:white; border-radius:12px; padding:12px 16px; border:1px solid rgba(0,0,0,0.06); }
+        .vg-cb { flex:1; text-align:center; }
+        .vg-cl { font-size:0.72rem; font-weight:800; color:#636e72; margin-bottom:6px; }
+        .vg-cm { font-weight:900; color:#b2bec3; font-size:1rem; }
+        #vg-bmp { border:2px solid #d63031; border-radius:8px; image-rendering:pixelated; display:block; margin:0 auto; }
+</style>
 </head>
 <body>
+<!-- ══ 선택 화면 ══ -->
+<div id="screen-select" style="display:flex;">
+    <div class="sel-wrap">
+        <div class="sel-title">🖼️ 이미지 표현 방식 실습</div>
+        <div class="sel-sub">어떤 방식으로 이미지를 탐구할까요?</div>
+        <div class="sel-cards">
+            <div class="sel-card sel-bitmap" onclick="enterGame('bitmap')">
+                <div class="sel-icon">🔲</div>
+                <div class="sel-chip">Bitmap</div>
+                <div class="sel-name">비트맵 방식</div>
+                <div class="sel-desc">픽셀과 RGB 채널을 조작해<br>저해상도 이미지 속<br>동물을 구출하세요!</div>
+                <div class="sel-badge">🦁 동물 구출 작전</div>
+                <div class="sel-go">▶ 시작하기</div>
+            </div>
+            <div class="sel-vs">VS</div>
+            <div class="sel-card sel-vector" onclick="enterGame('vector')">
+                <div class="sel-icon">📐</div>
+                <div class="sel-chip">Vector</div>
+                <div class="sel-name">벡터 방식</div>
+                <div class="sel-desc">SVG 좌표 명령어를 완성해<br>우리 반 교실 풍경을<br>그림으로 완성하세요!</div>
+                <div class="sel-badge">🏫 교실 스케치 미션</div>
+                <div class="sel-go">▶ 시작하기</div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- ✅ DATA BITBOX 공통 네비바 -->
 <style>
 #dbb-topnav {
@@ -223,8 +352,9 @@
 </style>
 <div id="dbb-topnav">
     <div style="display:flex;gap:9px;align-items:center;">
-        <a class="dbb-btn" href="index.html">← 메인으로</a>
-        <a class="dbb-btn" href="이미지_개념.html">📖 개념으로</a>
+        <a class="dbb-btn" href="index.html" style="border:1.5px solid rgba(45,52,54,0.25);background:rgba(45,52,54,0.06);color:white;cursor:pointer;">← 메인으로</a>
+        <a class="dbb-btn" href="이미지_개념.html" style="border:1.5px solid rgba(45,52,54,0.25);background:rgba(45,52,54,0.06);color:white;cursor:pointer;">📖 개념으로</a>
+        <button class="dbb-btn" onclick="backToSelect()" style="border:1.5px solid rgba(45,52,54,0.25);background:rgba(45,52,54,0.06);color:white;cursor:pointer;">🎮 선택으로</button>
     </div>
     <span class="dbb-title">🎮 이미지의 표현 · 활용 실습</span>
 </div>
@@ -320,13 +450,89 @@
                 
                 <div class="sub-btn-group">
                     <button class="btn-sub" onclick="skipMission()">⏭️ 스킵</button>
-                    <button class="btn-sub btn-reset" onclick="location.reload()">🔄 처음부터</button>
+                    <button class="btn-sub btn-reset" onclick="backToSelect()">🏠 선택 화면으로</button>
                 </div>
             </div>
         </div>
     </main>
 
-    <script>
+    
+<!-- ══ 벡터 게임 ══ -->
+<div id="game-vector">
+    <div class="vg-topbar">
+        <button class="vg-back" onclick="backToSelect()">← 선택 화면으로</button>
+        <span class="vg-topbar-ttl">📐 이미지의 표현 · 벡터 실습</span>
+    </div>
+    <div class="vg-body">
+        <div class="vg-left">
+            <div class="vg-ttl">📐 벡터 교실 스케치 미션</div>
+            <div class="vg-dsc" id="vg-dsc">SVG 명령어의 빈칸을 채워 교실 그림을 완성하세요!</div>
+            <div class="vg-pg-row">
+                <span class="vg-pg-lbl">진행도</span>
+                <div class="vg-pg-bar"><div class="vg-pg-fill" id="vg-pf"></div></div>
+                <span class="vg-pg-txt" id="vg-pt">0 / 6</span>
+            </div>
+            <div class="vg-sc-row">
+                <div class="vg-sc-box"><div class="vg-sc-num" id="vg-sc">0</div><div class="vg-sc-lbl">점수</div></div>
+                <div class="vg-sc-box"><div class="vg-sc-num" id="vg-cb">x1</div><div class="vg-sc-lbl">콤보</div></div>
+            </div>
+            <div class="vg-card" id="vg-card">
+                <div class="vg-mlbl" id="vg-ml">미션 1 / 6</div>
+                <div class="vg-code" id="vg-cd"></div>
+                <div class="vg-ins" id="vg-ins"></div>
+                <button class="vg-sub" onclick="checkVec()">✅ 확인</button>
+                <div class="vg-hr">
+                    <button class="vg-hbtn" onclick="vgHint()">💡 힌트 (-10점)</button>
+                    <span class="vg-htxt" id="vg-ht"></span>
+                </div>
+            </div>
+            <div class="vg-res" id="vg-res">
+                <div class="vg-ri">🏆</div>
+                <div class="vg-rt" id="vg-rt">교실 완성!</div>
+                <div class="vg-rs" id="vg-rsc">0점</div>
+                <div class="vg-rm">벡터 방식으로 그린 그림은<br>아무리 확대해도 절대 깨지지 않아요!</div>
+                <button class="vg-sub" onclick="vgRst()">🔄 다시 도전</button>
+            </div>
+        </div>
+        <div class="vg-right">
+            <div class="vg-cvs-hd">🖥️ 실시간 렌더링 <span class="vg-cvs-tag">Vector SVG</span></div>
+            <div class="vg-svg-box">
+                <svg id="vg-svg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="0" y="0" width="400" height="300" fill="#f5f0e8"/>
+                    <rect x="0" y="240" width="400" height="60" fill="#c8a87a"/>
+                    <rect id="vs-bd" x="60" y="30" width="280" height="0" fill="#2d6a4f" rx="4" opacity="0.2"/>
+                    <rect id="vs-bf" x="55" y="25" width="290" height="0" fill="none" stroke="#8B6914" stroke-width="0" rx="5"/>
+                    <rect id="vs-wn" x="305" y="45" width="0" height="0" fill="#87CEEB" rx="3" opacity="0.2"/>
+                    <rect id="vs-wf" x="302" y="42" width="0" height="0" fill="none" stroke="#8B6914" stroke-width="0" rx="4"/>
+                    <line id="vs-wh" x1="0" y1="0" x2="0" y2="0" stroke="#8B6914" stroke-width="0"/>
+                    <line id="vs-wv" x1="0" y1="0" x2="0" y2="0" stroke="#8B6914" stroke-width="0"/>
+                    <rect id="vs-d1" x="30" y="195" width="0" height="0" fill="#d4956a" rx="3" opacity="0.2"/>
+                    <rect id="vs-d1a" x="35" y="208" width="0" height="0" fill="#b07850"/>
+                    <rect id="vs-d1b" x="58" y="208" width="0" height="0" fill="#b07850"/>
+                    <rect id="vs-d2" x="135" y="195" width="0" height="0" fill="#d4956a" rx="3" opacity="0.2"/>
+                    <rect id="vs-d2a" x="140" y="208" width="0" height="0" fill="#b07850"/>
+                    <rect id="vs-d2b" x="163" y="208" width="0" height="0" fill="#b07850"/>
+                    <text id="vs-tx" x="200" y="90" text-anchor="middle" fill="white" font-size="0" font-family="sans-serif" opacity="0">벡터 그래픽</text>
+                    <rect id="vs-ch" x="40" y="212" width="0" height="0" fill="#e8c49a" rx="2" opacity="0.2"/>
+                    <line id="vs-cb" x1="0" y1="0" x2="0" y2="0" stroke="#b07850" stroke-width="0"/>
+                </svg>
+                <div class="vg-znote">🔍 벡터는 확대해도 절대 깨지지 않아요!</div>
+            </div>
+            <div class="vg-cmp">
+                <div class="vg-cb"><div class="vg-cl">🔲 비트맵 확대시</div><canvas id="vg-bmp" width="120" height="80"></canvas></div>
+                <div class="vg-cm">vs</div>
+                <div class="vg-cb"><div class="vg-cl">📐 벡터 확대시</div>
+                    <svg viewBox="95 25 10 8" width="120" height="80" style="border:2px solid #2d6a4f;border-radius:8px;background:#f5f0e8;display:block;margin:0 auto;">
+                        <rect x="60" y="30" width="280" height="120" fill="#2d6a4f" rx="4"/>
+                        <text x="200" y="97" text-anchor="middle" fill="white" font-size="14" font-family="sans-serif">벡터 그래픽</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
         const offCanvas = document.createElement('canvas');
@@ -504,6 +710,152 @@
         }
 
         canvas.width = 640; canvas.height = 480;
-    </script>
+    
+        // ══ 화면 전환 ══
+        function enterGame(type) {
+            document.getElementById('screen-select').style.display = 'none';
+            if (type === 'bitmap') {
+                document.getElementById('screen-select').style.display = 'none';
+            } else {
+                document.getElementById('game-vector').style.display = 'flex';
+                initVec();
+            }
+        }
+        function backToSelect() {
+            document.getElementById('game-vector').style.display = 'none';
+            document.getElementById('screen-select').style.display = 'flex';
+            // 비트맵 게임 상태 초기화
+            if (typeof isPlaying !== 'undefined' && isPlaying) {
+                clearInterval(timerInterval);
+                isPlaying = false;
+            }
+        }
+
+        // ══ 벡터 게임 데이터 ══
+        const VMS = [
+            { ttl:'칠판 그리기', dsc:'교실 앞 칠판을 SVG rect로 그려보세요.',
+              code:`&lt;rect x="60" y="30"
+  width="<span class='vg-blank' id='c0'>?</span>" height="<span class='vg-blank' id='c1'>?</span>"
+  fill="#2d6a4f" rx="4"/&gt;`,
+              ins:[{l:'width',id:'i0',a:280,h:'60에서→340까지 = ?',r:[200,320]},{l:'height',id:'i1',a:120,h:'30에서→150까지 = ?',r:[80,150]}],
+              ap(v){ vs('vg-svg',''); const b=g('vs-bd'); b.setAttribute('width',v[0]); b.setAttribute('height',v[1]); b.setAttribute('opacity','1');
+                     const f=g('vs-bf'); f.setAttribute('width',v[0]+10); f.setAttribute('height',v[1]+10); f.setAttribute('stroke-width','4'); }
+            },
+            { ttl:'창문 그리기', dsc:'오른쪽 벽의 창문을 그려보세요.',
+              code:`&lt;rect x="305" y="45"
+  width="<span class='vg-blank' id='c0'>?</span>" height="<span class='vg-blank' id='c1'>?</span>"
+  fill="#87CEEB" rx="3"/&gt;`,
+              ins:[{l:'width',id:'i0',a:65,h:'305→370, 약 65',r:[45,85]},{l:'height',id:'i1',a:85,h:'45→130, 약 85',r:[55,110]}],
+              ap(v){ const w=g('vs-wn'); w.setAttribute('width',v[0]); w.setAttribute('height',v[1]); w.setAttribute('opacity','1');
+                     const f=g('vs-wf'); f.setAttribute('width',v[0]+6); f.setAttribute('height',v[1]+6); f.setAttribute('stroke-width','3');
+                     const cx=305+v[0]/2, cy=45+v[1]/2;
+                     const h=g('vs-wh'); h.setAttribute('x1',305); h.setAttribute('y1',cy); h.setAttribute('x2',305+v[0]); h.setAttribute('y2',cy); h.setAttribute('stroke-width','2');
+                     const vl=g('vs-wv'); vl.setAttribute('x1',cx); vl.setAttribute('y1',45); vl.setAttribute('x2',cx); vl.setAttribute('y2',45+v[1]); vl.setAttribute('stroke-width','2'); }
+            },
+            { ttl:'첫 번째 책상', dsc:'앞줄 첫 번째 책상 상판을 그려보세요.',
+              code:`&lt;rect x="30" y="195"
+  width="<span class='vg-blank' id='c0'>?</span>" height="<span class='vg-blank' id='c1'>?</span>"
+  fill="#d4956a" rx="3"/&gt;`,
+              ins:[{l:'width',id:'i0',a:80,h:'책상 폭 약 80',r:[55,100]},{l:'height',id:'i1',a:10,h:'상판 두께 8~12',r:[6,16]}],
+              ap(v){ const d=g('vs-d1'); d.setAttribute('width',v[0]); d.setAttribute('height',v[1]); d.setAttribute('opacity','1');
+                     [g('vs-d1a'),g('vs-d1b')].forEach(l=>{l.setAttribute('width',5);l.setAttribute('height',22);}); }
+            },
+            { ttl:'두 번째 책상', dsc:'두 번째 책상도 같은 방식으로!',
+              code:`&lt;rect x="135" y="195"
+  width="<span class='vg-blank' id='c0'>?</span>" height="<span class='vg-blank' id='c1'>?</span>"
+  fill="#d4956a" rx="3"/&gt;`,
+              ins:[{l:'width',id:'i0',a:80,h:'첫 번째와 동일!',r:[55,100]},{l:'height',id:'i1',a:10,h:'첫 번째와 동일',r:[6,16]}],
+              ap(v){ const d=g('vs-d2'); d.setAttribute('width',v[0]); d.setAttribute('height',v[1]); d.setAttribute('opacity','1');
+                     [g('vs-d2a'),g('vs-d2b')].forEach(l=>{l.setAttribute('width',5);l.setAttribute('height',22);}); }
+            },
+            { ttl:'칠판에 글씨 쓰기', dsc:'칠판 중앙에 텍스트 크기를 설정해요.',
+              code:`&lt;text x="200" y="90"
+  font-size="<span class='vg-blank' id='c0'>?</span>"
+  fill="white"&gt;벡터 그래픽&lt;/text&gt;`,
+              ins:[{l:'font-size',id:'i0',a:20,h:'18~22 사이로',r:[12,30]}],
+              ap(v){ const t=g('vs-tx'); t.setAttribute('font-size',v[0]); t.setAttribute('opacity','1'); }
+            },
+            { ttl:'의자 그리기', dsc:'마지막! 첫 번째 책상 앞 의자를 완성하세요.',
+              code:`&lt;rect x="40" y="212"
+  width="<span class='vg-blank' id='c0'>?</span>" height="<span class='vg-blank' id='c1'>?</span>"
+  fill="#e8c49a" rx="2"/&gt;`,
+              ins:[{l:'width',id:'i0',a:55,h:'책상보다 작게 48~62',r:[38,72]},{l:'height',id:'i1',a:9,h:'얇게 7~12',r:[5,15]}],
+              ap(v){ const c=g('vs-ch'); c.setAttribute('width',v[0]); c.setAttribute('height',v[1]); c.setAttribute('opacity','1');
+                     const b=g('vs-cb'); b.setAttribute('x1',50); b.setAttribute('y1',212); b.setAttribute('x2',50); b.setAttribute('y2',200); b.setAttribute('stroke-width','5'); }
+            }
+        ];
+
+        function g(id){ return document.getElementById(id); }
+        function vs(id,attr,val){ const e=g(id); if(e&&attr) e.setAttribute(attr,val); }
+
+        let vI=0, vSc=0, vCo=1;
+
+        function initVec(){
+            vI=0; vSc=0; vCo=1;
+            g('vg-sc').textContent='0'; g('vg-cb').textContent='x1';
+            g('vg-pf').style.width='0%'; g('vg-pt').textContent='0 / 6';
+            g('vg-res').style.display='none'; g('vg-card').style.display='flex';
+            ['vs-bd','vs-bf','vs-wn','vs-wf','vs-d1','vs-d1a','vs-d1b','vs-d2','vs-d2a','vs-d2b','vs-tx','vs-ch','vs-cb'].forEach(id=>{
+                const el=g(id); if(!el) return;
+                ['width','height','font-size','stroke-width'].forEach(a=>el.setAttribute(a,'0'));
+                if(['rect','text'].includes(el.tagName)) el.setAttribute('opacity','0.2');
+            });
+            // 비트맵 비교 캔버스
+            const cv=g('vg-bmp'); if(cv){ const ctx=cv.getContext('2d'); const t=document.createElement('canvas'); t.width=8; t.height=6; const tc=t.getContext('2d'); tc.fillStyle='#2d6a4f'; tc.fillRect(0,0,8,6); tc.fillStyle='#a8ff78'; tc.font='3px sans-serif'; tc.fillText('AB',1,4); ctx.imageSmoothingEnabled=false; ctx.drawImage(t,0,0,120,80); }
+            loadVec(0);
+        }
+
+        function loadVec(idx){
+            const m=VMS[idx];
+            g('vg-ml').textContent=`미션 ${idx+1} / ${VMS.length}`;
+            g('vg-dsc').textContent=m.dsc;
+            g('vg-cd').innerHTML=m.code;
+            g('vg-ht').textContent='';
+            const div=g('vg-ins'); div.innerHTML='';
+            m.ins.forEach(inp=>{
+                const w=document.createElement('div');
+                w.style.cssText='display:flex;flex-direction:column;gap:4px;flex:1;min-width:75px;';
+                w.innerHTML=`<label style="font-size:0.7rem;font-weight:800;color:#636e72;">${inp.l}</label><input type="number" id="${inp.id}" class="vg-in" placeholder="?" min="${inp.r[0]}" max="${inp.r[1]}" onkeypress="if(event.key==='Enter')checkVec()">`;
+                div.appendChild(w);
+            });
+            g('vg-pf').style.width=(idx/VMS.length*100).toFixed(0)+'%';
+            g('vg-pt').textContent=`${idx} / ${VMS.length}`;
+        }
+
+        function checkVec(){
+            const m=VMS[vI]; let ok=true; const vals=[];
+            m.ins.forEach(inp=>{
+                const el=g(inp.id); const val=parseInt(el.value)||0;
+                const tol=Math.round(inp.a*0.13);
+                if(Math.abs(val-inp.a)<=tol){ el.classList.add('ok'); el.classList.remove('ng'); vals.push(val); }
+                else{ el.classList.add('ng'); el.classList.remove('ok'); setTimeout(()=>el.classList.remove('ng'),500); ok=false; vals.push(val); }
+            });
+            if(ok){
+                m.ap(vals);
+                const earned=(50+Math.round(40/m.ins.length))*vCo;
+                vSc+=earned; vCo=Math.min(vCo+1,4);
+                g('vg-sc').textContent=vSc; g('vg-cb').textContent=`x${vCo}`;
+                m.ins.forEach((_,i)=>{ const cb=g(`c${i}`); if(cb){cb.textContent=vals[i];cb.style.color='#a8ff78';cb.style.borderColor='rgba(168,255,120,0.8)';} });
+                vI++;
+                g('vg-pf').style.width=(vI/VMS.length*100).toFixed(0)+'%';
+                g('vg-pt').textContent=`${vI} / ${VMS.length}`;
+                setTimeout(()=>{ if(vI>=VMS.length) showVRes(); else loadVec(vI); },700);
+            } else { vCo=1; g('vg-cb').textContent='x1'; }
+        }
+
+        function vgHint(){ vSc=Math.max(0,vSc-10); g('vg-sc').textContent=vSc; g('vg-ht').textContent='💡 '+VMS[vI].ins.map(i=>i.h).join(' / '); }
+
+        function showVRes(){
+            g('vg-card').style.display='none';
+            const rp=g('vg-res'); rp.style.display='flex';
+            g('vg-pf').style.width='100%'; g('vg-pt').textContent='6 / 6';
+            g('vg-rsc').textContent=vSc+'점';
+            g('vg-rt').textContent=vSc>=300?'🏆 완벽한 스케치!':vSc>=180?'🎉 교실 완성!':'✅ 미션 클리어!';
+        }
+
+        function vgRst(){ initVec(); }
+
+</script>
+
 </body>
 </html>
